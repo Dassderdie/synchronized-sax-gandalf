@@ -1,4 +1,6 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { interval } from 'rxjs';
+import { distinctUntilChanged, map, skip, tap } from 'rxjs/operators';
 import { SynchronizedPlayer } from './synchronized-player';
 
 declare global {
@@ -49,11 +51,11 @@ export class YoutubePlayerComponent implements OnInit {
                 videoId: this.videoId,
                 playerVars: {
                     // TODO: change to enums (currently they are not correctly transpiled to js?)
-                    // controls: 1,
-                    // disablekb: 1,
-                    // iv_load_policy: 3,
+                    controls: 1,
+                    disablekb: 1,
+                    iv_load_policy: 3,
                     loop: 1,
-                    // modestbranding: 1,
+                    modestbranding: 1,
                 },
                 events: {
                     onReady: this.onPlayerReady.bind(this),
@@ -67,6 +69,14 @@ export class YoutubePlayerComponent implements OnInit {
         setTimeout(() => {
             assert(!!this.player);
             this.player.pauseVideo();
+            const currentTime$ = interval(100).pipe(
+                map(() => this.player!.getCurrentTime() * 1000),
+                // TODO: necessary?
+                // getCurrentTime() is only exact to 1000ms
+                // with these to operators we make sure that the time is circa 200ms exact
+                distinctUntilChanged((a, b) => Math.abs(a - b) >= 100),
+                skip(1)
+            );
             this.synchronizedPlayer = new SynchronizedPlayer(
                 this.synchronisationOffset,
                 () => {
@@ -75,7 +85,7 @@ export class YoutubePlayerComponent implements OnInit {
                     return duration;
                 },
                 (seconds) => this.player!.seekTo(seconds, true),
-                () => this.player!.getCurrentTime() * 1000,
+                currentTime$,
                 () => this.player!.playVideo(),
                 () => this.player!.pauseVideo()
             );
@@ -86,12 +96,12 @@ export class YoutubePlayerComponent implements OnInit {
         console.log(params);
     }
 
-    public play() {
-        this.player?.playVideo();
+    public synchronize() {
+        this.synchronizedPlayer?.play();
     }
 
     public pause() {
-        this.player?.pauseVideo();
+        this.synchronizedPlayer?.pause();
     }
 
     ngOnDestroy() {
