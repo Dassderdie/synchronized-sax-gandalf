@@ -51,7 +51,7 @@ export class YoutubePlayerComponent implements OnInit {
                 videoId: this.videoId,
                 playerVars: {
                     // TODO: change to enums (currently they are not correctly transpiled to js?)
-                    controls: 1,
+                    controls: 0,
                     disablekb: 1,
                     iv_load_policy: 3,
                     loop: 1,
@@ -59,7 +59,6 @@ export class YoutubePlayerComponent implements OnInit {
                 },
                 events: {
                     onReady: this.onPlayerReady.bind(this),
-                    onStateChange: this.onPlayerStateChange.bind(this),
                 },
             });
         };
@@ -90,10 +89,6 @@ export class YoutubePlayerComponent implements OnInit {
                 () => this.player!.pauseVideo()
             );
         }, 1000);
-    }
-
-    private onPlayerStateChange(params: YT.OnStateChangeEvent) {
-        console.log(params);
     }
 
     public synchronize() {
