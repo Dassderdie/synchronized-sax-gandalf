@@ -1,7 +1,9 @@
-<div>
-    <!-- Gets replaced by an iframe with the youtube player -->
-    <div id="ytPlayerPlaceholder"></div>
+<div style="position: absolute; top: 0">
     <button (click)="synchronize()">Synchronize</button>
     <button (click)="pause()">Pause</button>
+    <span style="background-color: rgba(255, 255, 255, 0.5)">
+        {{ synchronizedPlayer?.state$ | async }}
+    </span>
 </div>
-<br />
+<!-- Gets replaced by an iframe with the youtube player -->
+<div id="ytPlayerPlaceholder"></div>

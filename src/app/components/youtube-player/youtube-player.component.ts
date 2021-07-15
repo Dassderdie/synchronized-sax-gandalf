@@ -22,18 +22,8 @@ export class YoutubePlayerComponent implements OnInit {
     public readonly videoId = 'BBGEG21CGo0';
     public readonly synchronisationOffset = 0;
 
-    public videoUrlParams = {
-        videoId: 'BBGEG21CGo0',
-        options: {
-            controls: 0,
-            disablekb: 1,
-            iv_load_policy: 3,
-            loop: 1,
-            modestbranding: 1,
-        },
-    };
     private player?: YT.Player;
-    private synchronizedPlayer?: SynchronizedPlayer;
+    public synchronizedPlayer?: SynchronizedPlayer;
 
     ngOnInit(): void {
         // TODO: make sure this only happens once
@@ -54,8 +44,10 @@ export class YoutubePlayerComponent implements OnInit {
                     controls: 0,
                     disablekb: 1,
                     iv_load_policy: 3,
-                    loop: 1,
                     modestbranding: 1,
+                    loop: 1,
+                    // necessary to make the looping work
+                    playlist: this.videoId,
                 },
                 events: {
                     onReady: this.onPlayerReady.bind(this),
@@ -68,13 +60,8 @@ export class YoutubePlayerComponent implements OnInit {
         setTimeout(() => {
             assert(!!this.player);
             this.player.pauseVideo();
-            const currentTime$ = interval(100).pipe(
-                map(() => this.player!.getCurrentTime() * 1000),
-                // TODO: necessary?
-                // getCurrentTime() is only exact to 1000ms
-                // with these to operators we make sure that the time is circa 200ms exact
-                distinctUntilChanged((a, b) => Math.abs(a - b) >= 100),
-                skip(1)
+            const currentTime$ = interval(2000).pipe(
+                map(() => this.player!.getCurrentTime() * 1000)
             );
             this.synchronizedPlayer = new SynchronizedPlayer(
                 this.synchronisationOffset,

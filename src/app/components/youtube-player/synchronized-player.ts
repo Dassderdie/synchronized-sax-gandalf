@@ -1,5 +1,5 @@
-import { Observable, Subject } from 'rxjs';
-import { debounceTime, takeUntil } from 'rxjs/operators';
+import { Observable, ReplaySubject, Subject } from 'rxjs';
+import { filter, takeUntil, throttleTime } from 'rxjs/operators';
 
 /**
  * All time-values are in ms
@@ -8,6 +8,7 @@ export class SynchronizedPlayer {
     private readonly destroyed = new Subject();
 
     private isPaused = false;
+    public readonly state$ = new ReplaySubject<SynchronizedPlayerState>(1);
 
     constructor(
         private readonly synchronisationOffset: number,
@@ -22,13 +23,18 @@ export class SynchronizedPlayer {
         private readonly playVideo: () => void,
         private readonly pauseVideo: () => void
     ) {
-        // this.playSynchronized();
+        this.playSynchronized();
         currentTime$
-            .pipe(takeUntil(this.destroyed), debounceTime(1000))
+            .pipe(
+                takeUntil(this.destroyed),
+                throttleTime(1000),
+                filter(() => !this.synchronisationTimeout)
+            )
             .subscribe((currentTime) => {
                 const deviation = Math.abs(
                     this.getExpectedCurrentTime() - currentTime
                 );
+                console.log('check deviation:', deviation);
                 if (deviation > MAXIMUM_DEVIATION) {
                     this.playSynchronized();
                 }
@@ -37,27 +43,33 @@ export class SynchronizedPlayer {
 
     private synchronisationTimeout?: ReturnType<typeof setTimeout>;
     public playSynchronized() {
-        if (this.synchronisationTimeout) {
-            clearTimeout(this.synchronisationTimeout);
-        }
+        this.clearSynchronisationTimeout();
         if (this.isPaused) {
             return;
         }
+        const seekToSeconds =
+            ((this.getExpectedCurrentTime() + PRELOAD_TIME) %
+                this.getDuration()) /
+            1000;
+        console.log('seekToSeconds', seekToSeconds);
+
         this.pauseVideo();
-        const seekToSeconds = Math.max(
-            Math.round(
-                ((this.getExpectedCurrentTime() + PRELOAD_TIME) %
-                    this.getDuration()) /
-                    1000
-            ),
-            1
-        );
         this.seekTo(seekToSeconds);
         this.pauseVideo();
-
+        this.state$.next('synchronizing');
         this.synchronisationTimeout = setTimeout(() => {
             this.playVideo();
-        }, this.getTimeUntilSeekIsValid(seekToSeconds * 1000));
+            this.state$.next('playing');
+
+            this.clearSynchronisationTimeout();
+        }, PRELOAD_TIME);
+    }
+
+    private clearSynchronisationTimeout() {
+        if (this.synchronisationTimeout) {
+            clearTimeout(this.synchronisationTimeout);
+        }
+        this.synchronisationTimeout = undefined;
     }
 
     public play() {
@@ -67,23 +79,13 @@ export class SynchronizedPlayer {
 
     public pause() {
         this.isPaused = true;
-        if (this.synchronisationTimeout) {
-            clearTimeout(this.synchronisationTimeout);
-        }
+        this.clearSynchronisationTimeout();
         this.pauseVideo();
+        this.state$.next('paused');
     }
 
     private getExpectedCurrentTime() {
         return (Date.now() + this.synchronisationOffset) % this.getDuration();
-    }
-
-    private getTimeUntilSeekIsValid(seekToPart: number) {
-        const videoDuration = this.getDuration();
-        return Math.abs(
-            (seekToPart -
-                ((Date.now() + this.synchronisationOffset) % videoDuration)) %
-                videoDuration
-        );
     }
 
     public destroy() {
@@ -97,3 +99,5 @@ export class SynchronizedPlayer {
  */
 const PRELOAD_TIME = 3000;
 const MAXIMUM_DEVIATION = 100;
+
+export type SynchronizedPlayerState = 'synchronizing' | 'paused' | 'playing';
