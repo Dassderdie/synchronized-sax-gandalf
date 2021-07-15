@@ -1,5 +1,5 @@
-import { Observable, ReplaySubject, Subject } from 'rxjs';
-import { filter, takeUntil, throttleTime } from 'rxjs/operators';
+import { interval, ReplaySubject, Subject } from 'rxjs';
+import { filter, takeUntil } from 'rxjs/operators';
 
 /**
  * All time-values are in ms
@@ -9,35 +9,34 @@ export class SynchronizedPlayer {
 
     private isPaused = false;
     public readonly state$ = new ReplaySubject<SynchronizedPlayerState>(1);
+    /**
+     * The current deviation from the "base" timeline
+     */
+    public readonly deviation$ = new ReplaySubject<number>(1);
 
     constructor(
         private readonly synchronisationOffset: number,
         private readonly getDuration: () => number,
         // This is in seconds
         private readonly seekTo: (seconds: number) => void,
-        /**
-         * Emits the current time of the video in ms in arbitrary intervalls
-         * TODO: these times must be 100ms exact
-         */
-        currentTime$: Observable<number>,
+        private readonly getCurrentTime: () => number,
         private readonly playVideo: () => void,
         private readonly pauseVideo: () => void
     ) {
         this.playSynchronized();
-        currentTime$
+        interval(1000)
             .pipe(
                 takeUntil(this.destroyed),
-                throttleTime(1000),
                 filter(() => !this.synchronisationTimeout)
             )
-            .subscribe((currentTime) => {
+            .subscribe(() => {
                 const deviation = Math.abs(
-                    this.getExpectedCurrentTime() - currentTime
+                    this.getExpectedCurrentTime() - this.getCurrentTime()
                 );
-                console.log('check deviation:', deviation);
                 if (deviation > MAXIMUM_DEVIATION) {
                     this.playSynchronized();
                 }
+                this.deviation$.next(Math.round(deviation));
             });
     }
 
@@ -51,8 +50,6 @@ export class SynchronizedPlayer {
             ((this.getExpectedCurrentTime() + PRELOAD_TIME) %
                 this.getDuration()) /
             1000;
-        console.log('seekToSeconds', seekToSeconds);
-
         this.pauseVideo();
         this.seekTo(seekToSeconds);
         this.pauseVideo();
@@ -62,7 +59,9 @@ export class SynchronizedPlayer {
             this.state$.next('playing');
 
             this.clearSynchronisationTimeout();
-        }, PRELOAD_TIME);
+            // 50 seems to be the average time to get the player to play
+            // this does not reduce the synchronisation difference, but helps to make the Average deviation more accurate
+        }, PRELOAD_TIME - 50);
     }
 
     private clearSynchronisationTimeout() {
@@ -98,6 +97,6 @@ export class SynchronizedPlayer {
  * TODO: check with player.getVideoLoadedFraction
  */
 const PRELOAD_TIME = 3000;
-const MAXIMUM_DEVIATION = 100;
+const MAXIMUM_DEVIATION = 50;
 
 export type SynchronizedPlayerState = 'synchronizing' | 'paused' | 'playing';

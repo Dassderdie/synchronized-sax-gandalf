@@ -1,6 +1,5 @@
+import { ChangeDetectorRef, NgZone } from '@angular/core';
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { interval } from 'rxjs';
-import { distinctUntilChanged, map, skip, tap } from 'rxjs/operators';
 import { SynchronizedPlayer } from './synchronized-player';
 
 declare global {
@@ -24,6 +23,11 @@ export class YoutubePlayerComponent implements OnInit {
 
     private player?: YT.Player;
     public synchronizedPlayer?: SynchronizedPlayer;
+
+    constructor(
+        private readonly changeDetectorRef: ChangeDetectorRef,
+        private readonly zone: NgZone
+    ) {}
 
     ngOnInit(): void {
         // TODO: make sure this only happens once
@@ -57,12 +61,10 @@ export class YoutubePlayerComponent implements OnInit {
     }
 
     private onPlayerReady(event: YT.PlayerEvent) {
-        setTimeout(() => {
+        // onYouTubeIframeAPIReady ran outside the zone
+        this.zone.run(() => {
             assert(!!this.player);
             this.player.pauseVideo();
-            const currentTime$ = interval(2000).pipe(
-                map(() => this.player!.getCurrentTime() * 1000)
-            );
             this.synchronizedPlayer = new SynchronizedPlayer(
                 this.synchronisationOffset,
                 () => {
@@ -71,11 +73,13 @@ export class YoutubePlayerComponent implements OnInit {
                     return duration;
                 },
                 (seconds) => this.player!.seekTo(seconds, true),
-                currentTime$,
+                () => this.player!.getCurrentTime() * 1000,
                 () => this.player!.playVideo(),
                 () => this.player!.pauseVideo()
             );
-        }, 1000);
+            // because onPlayerReady is no event patched by zone.js
+            this.changeDetectorRef.detectChanges();
+        });
     }
 
     public synchronize() {

@@ -8,7 +8,12 @@ import { LandingPageModule } from './components/landing-page/landing-page.module
 
 @NgModule({
     declarations: [AppComponent],
-    imports: [BrowserModule, AppRoutingModule, BrowserAnimationsModule, LandingPageModule],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        BrowserAnimationsModule,
+        LandingPageModule,
+    ],
     providers: [],
     bootstrap: [AppComponent],
 })
