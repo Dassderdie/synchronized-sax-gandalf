@@ -1,5 +1,5 @@
 import { interval, ReplaySubject, Subject } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
+import { filter, skip, takeUntil } from 'rxjs/operators';
 
 /**
  * All time-values are in ms
@@ -13,6 +13,7 @@ export class SynchronizedPlayer {
      * The current deviation from the "base" timeline
      */
     public readonly deviation$ = new ReplaySubject<number>(1);
+    private synchronisationTime = 50;
 
     constructor(
         private readonly synchronisationOffset: number,
@@ -24,21 +25,57 @@ export class SynchronizedPlayer {
         private readonly pauseVideo: () => void
     ) {
         this.playSynchronized();
+        let estimatedSynchronisationTimeDifference = this.synchronisationTime;
         interval(1000)
             .pipe(
                 takeUntil(this.destroyed),
-                filter(() => !this.synchronisationTimeout)
+                filter(() => !this.synchronisationTimeout),
+                skip(1)
             )
             .subscribe(() => {
-                const deviation = Math.abs(
-                    this.getExpectedCurrentTime() - this.getCurrentTime()
-                );
-                if (deviation > MAXIMUM_DEVIATION) {
+                const expectedTime = this.getExpectedCurrentTime();
+                const currentTime = this.getCurrentTime();
+                const deviation = expectedTime - currentTime;
+                if (Math.abs(deviation) > MAXIMUM_DEVIATION) {
+                    // the video is probably stuck/buffering
+                    console.log('stuck');
                     this.playSynchronized();
+                } else {
+                    this.lastDeviations.shift();
+                    this.lastDeviations.push(deviation);
+                    const median = (array: number[]) =>
+                        [...array].sort()[Math.floor(array.length / 2)];
+                    // wait until all are loaded
+                    if (
+                        this.lastDeviations.every(
+                            (lastDeviation) => typeof lastDeviation === 'number'
+                        )
+                    ) {
+                        estimatedSynchronisationTimeDifference = median(
+                            // ignore the first 3 elements because they have (likely) are likely inaccurate because of the synchronisation
+                            (this.lastDeviations as number[]).slice(3, -1)
+                        );
+                        if (
+                            Math.abs(estimatedSynchronisationTimeDifference) >
+                            20
+                        ) {
+                            console.log(
+                                this.lastDeviations,
+                                estimatedSynchronisationTimeDifference,
+                                this.synchronisationTime
+                            );
+                            this.synchronisationTime +=
+                                estimatedSynchronisationTimeDifference;
+
+                            this.playSynchronized();
+                        }
+                    }
                 }
                 this.deviation$.next(Math.round(deviation));
             });
     }
+
+    private lastDeviations: (number | null)[] = new Array(15).fill(null);
 
     private synchronisationTimeout?: ReturnType<typeof setTimeout>;
     public playSynchronized() {
@@ -46,6 +83,7 @@ export class SynchronizedPlayer {
         if (this.isPaused) {
             return;
         }
+        this.lastDeviations = new Array(15).fill(null);
         const seekToSeconds =
             ((this.getExpectedCurrentTime() + PRELOAD_TIME) %
                 this.getDuration()) /
@@ -59,9 +97,7 @@ export class SynchronizedPlayer {
             this.state$.next('playing');
 
             this.clearSynchronisationTimeout();
-            // 50 seems to be the average time to get the player to play
-            // this does not reduce the synchronisation difference, but helps to make the Average deviation more accurate
-        }, PRELOAD_TIME - 50);
+        }, PRELOAD_TIME - this.synchronisationTime);
     }
 
     private clearSynchronisationTimeout() {
@@ -97,6 +133,6 @@ export class SynchronizedPlayer {
  * TODO: check with player.getVideoLoadedFraction
  */
 const PRELOAD_TIME = 3000;
-const MAXIMUM_DEVIATION = 50;
+const MAXIMUM_DEVIATION = 1000;
 
 export type SynchronizedPlayerState = 'synchronizing' | 'paused' | 'playing';
