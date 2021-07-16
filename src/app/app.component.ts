@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { SwUpdate } from '@angular/service-worker';
 
 @Component({
     selector: 'app-root',
@@ -6,5 +7,9 @@ import { Component } from '@angular/core';
     styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-    title = 'synchronized-sax-gandalf';
+    constructor(private readonly swUpdate: SwUpdate) {
+        if (this.swUpdate.isEnabled) {
+            this.swUpdate.checkForUpdate();
+        }
+    }
 }

@@ -133,6 +133,6 @@ export class SynchronizedPlayer {
  * TODO: check with player.getVideoLoadedFraction
  */
 const PRELOAD_TIME = 3000;
-const MAXIMUM_DEVIATION = 1000;
+const MAXIMUM_DEVIATION = 3000;
 
 export type SynchronizedPlayerState = 'synchronizing' | 'paused' | 'playing';
