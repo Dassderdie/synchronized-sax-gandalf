@@ -1,5 +1,6 @@
 import { interval, ReplaySubject, Subject } from 'rxjs';
-import { filter, skip, takeUntil } from 'rxjs/operators';
+import { filter, takeUntil } from 'rxjs/operators';
+import { SyncDifferenceEstimator } from './sync-difference-estimator';
 
 /**
  * All time-values are in ms
@@ -13,6 +14,7 @@ export class SynchronizedPlayer {
      * The current deviation from the "base" timeline
      */
     public readonly deviation$ = new ReplaySubject<number>(1);
+    private syncDifferenceEstimator = new SyncDifferenceEstimator();
     private synchronisationTime = 50;
 
     constructor(
@@ -25,12 +27,10 @@ export class SynchronizedPlayer {
         private readonly pauseVideo: () => void
     ) {
         this.playSynchronized();
-        let estimatedSynchronisationTimeDifference = this.synchronisationTime;
-        interval(1000)
+        interval(500)
             .pipe(
                 takeUntil(this.destroyed),
-                filter(() => !this.synchronisationTimeout),
-                skip(1)
+                filter(() => !this.synchronisationTimeout)
             )
             .subscribe(() => {
                 const expectedTime = this.getExpectedCurrentTime();
@@ -41,41 +41,19 @@ export class SynchronizedPlayer {
                     console.log('stuck');
                     this.playSynchronized();
                 } else {
-                    this.lastDeviations.shift();
-                    this.lastDeviations.push(deviation);
-                    const median = (array: number[]) =>
-                        [...array].sort()[Math.floor(array.length / 2)];
-                    // wait until all are loaded
+                    this.syncDifferenceEstimator.addDeviation(deviation);
                     if (
-                        this.lastDeviations.every(
-                            (lastDeviation) => typeof lastDeviation === 'number'
-                        )
+                        this.syncDifferenceEstimator.estimatedSyncTimeDifference
                     ) {
-                        estimatedSynchronisationTimeDifference = median(
-                            // ignore the first 3 elements because they have (likely) are likely inaccurate because of the synchronisation
-                            (this.lastDeviations as number[]).slice(3, -1)
-                        );
-                        if (
-                            Math.abs(estimatedSynchronisationTimeDifference) >
-                            20
-                        ) {
-                            console.log(
-                                this.lastDeviations,
-                                estimatedSynchronisationTimeDifference,
-                                this.synchronisationTime
-                            );
-                            this.synchronisationTime +=
-                                estimatedSynchronisationTimeDifference;
-
-                            this.playSynchronized();
-                        }
+                        this.synchronisationTime +=
+                            this.syncDifferenceEstimator.estimatedSyncTimeDifference;
+                        this.playSynchronized();
+                        this.syncDifferenceEstimator.synchronizing();
                     }
                 }
                 this.deviation$.next(Math.round(deviation));
             });
     }
-
-    private lastDeviations: (number | null)[] = new Array(15).fill(null);
 
     private synchronisationTimeout?: ReturnType<typeof setTimeout>;
     public playSynchronized() {
@@ -83,7 +61,6 @@ export class SynchronizedPlayer {
         if (this.isPaused) {
             return;
         }
-        this.lastDeviations = new Array(15).fill(null);
         const seekToSeconds =
             ((this.getExpectedCurrentTime() + PRELOAD_TIME) %
                 this.getDuration()) /
