@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { YoutubePlayerComponent } from './youtube-player.component';
+import { DemoComponent } from './demo/demo.component';
 
-const routes: Routes = [{ path: '', component: YoutubePlayerComponent }];
+const routes: Routes = [{ path: '', component: DemoComponent }];
 
 @NgModule({
     imports: [RouterModule.forChild(routes)],
     exports: [RouterModule],
 })
-export class YoutubePlayerRoutingModule {}
+export class DemoRoutingModule {}

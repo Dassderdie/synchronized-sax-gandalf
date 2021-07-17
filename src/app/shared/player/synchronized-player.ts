@@ -18,10 +18,9 @@ export class SynchronizedPlayer {
     private synchronisationTime = 50;
 
     constructor(
-        private readonly synchronisationOffset: number,
+        public synchronisationOffset: number,
         private readonly getDuration: () => number,
-        // This is in seconds
-        private readonly seekTo: (seconds: number) => void,
+        private readonly seekTo: (ms: number) => void,
         private readonly getCurrentTime: () => number,
         private readonly playVideo: () => void,
         private readonly pauseVideo: () => void
@@ -61,12 +60,10 @@ export class SynchronizedPlayer {
         if (this.isPaused) {
             return;
         }
-        const seekToSeconds =
-            ((this.getExpectedCurrentTime() + PRELOAD_TIME) %
-                this.getDuration()) /
-            1000;
         this.pauseVideo();
-        this.seekTo(seekToSeconds);
+        this.seekTo(
+            (this.getExpectedCurrentTime() + PRELOAD_TIME) % this.getDuration()
+        );
         this.pauseVideo();
         this.state$.next('synchronizing');
         this.synchronisationTimeout = setTimeout(() => {

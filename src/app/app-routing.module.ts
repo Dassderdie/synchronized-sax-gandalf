@@ -3,11 +3,9 @@ import { RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
     {
-        path: 'youtube-player',
+        path: 'demo',
         loadChildren: () =>
-            import('./components/youtube-player/youtube-player.module').then(
-                (m) => m.YoutubePlayerModule
-            ),
+            import('./components/demo/demo.module').then((m) => m.DemoModule),
     },
     {
         path: '',

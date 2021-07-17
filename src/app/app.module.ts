@@ -7,6 +7,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LandingPageModule } from './components/landing-page/landing-page.module';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
+import { DemoModule } from './components/demo/demo.module';
 
 @NgModule({
     declarations: [AppComponent],
@@ -21,6 +22,7 @@ import { environment } from '../environments/environment';
           // or after 30 seconds (whichever comes first).
           registrationStrategy: 'registerWhenStable:30000'
         }),
+        DemoModule,
     ],
     providers: [],
     bootstrap: [AppComponent],

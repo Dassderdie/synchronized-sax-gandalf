@@ -7,7 +7,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 })
 export class LandingPageComponent implements OnInit {
     public readonly demoUrl = this.domSanitizer.bypassSecurityTrustResourceUrl(
-        `${location.href}youtube-player`
+        `${location.href}demo`
     );
 
     constructor(private readonly domSanitizer: DomSanitizer) {}

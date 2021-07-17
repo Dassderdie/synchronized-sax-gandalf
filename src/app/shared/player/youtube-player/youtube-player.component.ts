@@ -1,15 +1,16 @@
-import { ChangeDetectorRef, NgZone } from '@angular/core';
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { SynchronizedPlayer } from './synchronized-player';
-
-declare global {
-    interface Window {
-        /**
-         * This function is called by YT after the api is ready
-         */
-        onYouTubeIframeAPIReady: (() => void) | undefined;
-    }
-}
+import {
+    AfterViewInit,
+    ChangeDetectorRef,
+    ElementRef,
+    NgZone,
+    OnChanges,
+    SimpleChanges,
+    ViewChild,
+} from '@angular/core';
+import { Input } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { SynchronizedPlayer } from './../synchronized-player';
+import { YoutubePlayerApiService } from './youtube-player-api.service';
 
 @Component({
     selector: 'app-youtube-player',
@@ -17,29 +18,25 @@ declare global {
     styleUrls: ['./youtube-player.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class YoutubePlayerComponent implements OnInit {
-    public readonly videoId = 'BBGEG21CGo0';
-    public readonly synchronisationOffset = 0;
+export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
+    @Input() videoId!: string;
+    @Input() synchronisationOffset = 0;
 
+    @ViewChild('playerPlaceholder')
+    playerPlaceholder!: ElementRef<HTMLDivElement>;
     private player?: YT.Player;
     public synchronizedPlayer?: SynchronizedPlayer;
 
     constructor(
         private readonly changeDetectorRef: ChangeDetectorRef,
-        private readonly zone: NgZone
+        private readonly zone: NgZone,
+        private readonly youtubePlayerApiService: YoutubePlayerApiService
     ) {}
 
-    ngOnInit(): void {
-        // TODO: make sure this only happens once
-        // This code loads the IFrame Player API code asynchronously, according to the instructions at
-        // https://developers.google.com/youtube/iframe_api_reference#Getting_Started
-        const tag = document.createElement('script');
-        tag.src = 'https://www.youtube.com/iframe_api';
-        document.body.appendChild(tag);
-        // 3. This function creates an <iframe> (and YouTube player)
-        //    after the API code downloads.
-        window.onYouTubeIframeAPIReady = () => {
-            this.player = new YT.Player('ytPlayerPlaceholder', {
+    async ngAfterViewInit() {
+        this.player = await this.youtubePlayerApiService.createYtPlayer(
+            this.playerPlaceholder.nativeElement,
+            {
                 height: '390',
                 width: '640',
                 videoId: this.videoId,
@@ -56,8 +53,20 @@ export class YoutubePlayerComponent implements OnInit {
                 events: {
                     onReady: this.onPlayerReady.bind(this),
                 },
-            });
-        };
+            }
+        );
+    }
+
+    ngOnChanges(changes: SimpleChanges) {
+        // TODO: test
+        if (changes.videoId && this.player) {
+            this.player?.loadVideoById(this.videoId);
+        }
+        if (changes.synchronisationOffset && this.synchronizedPlayer) {
+            this.synchronizedPlayer.synchronisationOffset =
+                this.synchronisationOffset;
+            this.synchronizedPlayer.playSynchronized();
+        }
     }
 
     private onPlayerReady(event: YT.PlayerEvent) {
@@ -72,7 +81,7 @@ export class YoutubePlayerComponent implements OnInit {
                     assert(0 < duration);
                     return duration;
                 },
-                (seconds) => this.player!.seekTo(seconds, true),
+                (ms) => this.player!.seekTo(ms / 1000, true),
                 () => this.player!.getCurrentTime() * 1000,
                 () => this.player!.playVideo(),
                 () => this.player!.pauseVideo()
