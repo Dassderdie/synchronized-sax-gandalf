@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
+import { mapValues } from 'lodash-es';
 
 declare global {
     interface Window {
@@ -13,7 +14,7 @@ declare global {
     providedIn: 'root',
 })
 export class YoutubePlayerApiService {
-    constructor() {}
+    constructor(private readonly zone: NgZone) {}
 
     private _createYtPlayer?: (
         elt: HTMLElement,
@@ -39,7 +40,21 @@ export class YoutubePlayerApiService {
                 this._createYtPlayer = (
                     elt: HTMLElement,
                     options: YT.PlayerOptions
-                ) => new YT.Player(elt, options);
+                ) =>
+                    new YT.Player(elt, {
+                        ...options,
+                        events: {
+                            // run inside the zone
+                            ...mapValues(options.events, (handler) =>
+                                handler
+                                    ? () =>
+                                          this.zone.run((event) =>
+                                              handler(event)
+                                          )
+                                    : undefined
+                            ),
+                        },
+                    });
                 resolve(this._createYtPlayer(elt, options));
             };
         });

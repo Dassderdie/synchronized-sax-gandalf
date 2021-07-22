@@ -2,7 +2,6 @@ import {
     AfterViewInit,
     ChangeDetectorRef,
     ElementRef,
-    NgZone,
     OnChanges,
     SimpleChanges,
     ViewChild,
@@ -29,7 +28,6 @@ export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
 
     constructor(
         private readonly changeDetectorRef: ChangeDetectorRef,
-        private readonly zone: NgZone,
         private readonly youtubePlayerApiService: YoutubePlayerApiService
     ) {}
 
@@ -70,8 +68,6 @@ export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
     }
 
     private onPlayerReady(event: YT.PlayerEvent) {
-        // onYouTubeIframeAPIReady ran outside the zone
-        this.zone.run(() => {
             assert(!!this.player);
             this.player.pauseVideo();
             this.synchronizedPlayer = new SynchronizedPlayer(
@@ -88,7 +84,6 @@ export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
             );
             // because onPlayerReady is no event patched by zone.js
             this.changeDetectorRef.detectChanges();
-        });
     }
 
     public synchronize() {
