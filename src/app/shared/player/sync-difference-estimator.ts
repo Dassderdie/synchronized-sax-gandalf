@@ -1,9 +1,17 @@
+import { Subject } from 'rxjs';
+
 export class SyncDifferenceEstimator {
     private lastDeviations: (number | null)[] = new Array(4).fill(null);
     public estimatedSyncTimeDifference?: number;
+    /**
+     * Emits every time the video is probably stuck
+     */
+    public readonly stuck$ = new Subject();
+
     public addDeviation(deviation: number) {
         this.lastDeviations.shift();
         this.lastDeviations.push(deviation);
+
         // wait until all are loaded
         if (
             this.lastDeviations.every(
@@ -20,6 +28,18 @@ export class SyncDifferenceEstimator {
                 this.lastDeviations.unshift(null);
             }
         }
+        // Wether the video seems stuck
+        if (
+            this.lastDeviations
+                .slice(-3)
+                .every(
+                    (lastDeviation) =>
+                        typeof lastDeviation === 'number' &&
+                        Math.abs(deviation) > MAXIMUM_DEVIATION
+                )
+        ) {
+            this.stuck$.next();
+        }
     }
 
     public synchronizing() {
@@ -35,3 +55,5 @@ function median(array: number[]) {
         ? sortedArray[mid - 0.5]
         : (sortedArray[mid - 1] + sortedArray[mid]) / 2;
 }
+
+const MAXIMUM_DEVIATION = 3000;

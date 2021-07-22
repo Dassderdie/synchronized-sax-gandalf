@@ -26,6 +26,14 @@ export class SynchronizedPlayer {
         private readonly pauseVideo: () => void
     ) {
         this.playSynchronized();
+        this.syncDifferenceEstimator.stuck$
+            .pipe(takeUntil(this.destroyed))
+            .subscribe(() => {
+                console.log('stuck');
+
+                this.playSynchronized();
+                this.syncDifferenceEstimator.synchronizing();
+            });
         interval(500)
             .pipe(
                 takeUntil(this.destroyed),
@@ -35,20 +43,12 @@ export class SynchronizedPlayer {
                 const expectedTime = this.getExpectedCurrentTime();
                 const currentTime = this.getCurrentTime();
                 const deviation = expectedTime - currentTime;
-                if (Math.abs(deviation) > MAXIMUM_DEVIATION) {
-                    // the video is probably stuck/buffering
-                    console.log('stuck');
+                this.syncDifferenceEstimator.addDeviation(deviation);
+                if (this.syncDifferenceEstimator.estimatedSyncTimeDifference) {
+                    this.synchronisationTime +=
+                        this.syncDifferenceEstimator.estimatedSyncTimeDifference;
                     this.playSynchronized();
-                } else {
-                    this.syncDifferenceEstimator.addDeviation(deviation);
-                    if (
-                        this.syncDifferenceEstimator.estimatedSyncTimeDifference
-                    ) {
-                        this.synchronisationTime +=
-                            this.syncDifferenceEstimator.estimatedSyncTimeDifference;
-                        this.playSynchronized();
-                        this.syncDifferenceEstimator.synchronizing();
-                    }
+                    this.syncDifferenceEstimator.synchronizing();
                 }
                 this.deviation$.next(Math.round(deviation));
             });
@@ -107,6 +107,5 @@ export class SynchronizedPlayer {
  * TODO: check with player.getVideoLoadedFraction
  */
 const PRELOAD_TIME = 3000;
-const MAXIMUM_DEVIATION = 3000;
 
 export type SynchronizedPlayerState = 'synchronizing' | 'paused' | 'playing';
