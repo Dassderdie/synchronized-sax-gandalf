@@ -1,5 +1,6 @@
 import { interval, ReplaySubject, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
+import { SynchronizedPlayerConfiguration } from './synchronized-player-configuration';
 import { SyncDifferenceEstimator } from './sync-difference-estimator';
 
 /**
@@ -14,11 +15,11 @@ export class SynchronizedPlayer {
      * The current deviation from the "base" timeline
      */
     public readonly deviation$ = new ReplaySubject<number>(1);
-    private syncDifferenceEstimator = new SyncDifferenceEstimator();
-    private synchronisationTime = 50;
+    private syncDifferenceEstimator: SyncDifferenceEstimator;
+    private synchronisationTime = this.config.synchronisationStartTime;
 
     constructor(
-        public synchronisationOffset: number,
+        private config: SynchronizedPlayerConfiguration,
         private readonly getDuration: () => number,
         private readonly seekTo: (ms: number) => void,
         private readonly getCurrentTime: () => number,
@@ -26,6 +27,10 @@ export class SynchronizedPlayer {
         private readonly pauseVideo: () => void
     ) {
         this.playSynchronized();
+        this.syncDifferenceEstimator = new SyncDifferenceEstimator(
+            config.stuckDeviation,
+            config.syncPrecision
+        );
         this.syncDifferenceEstimator.stuck$
             .pipe(takeUntil(this.destroyed))
             .subscribe(() => {
@@ -62,7 +67,8 @@ export class SynchronizedPlayer {
         }
         this.pauseVideo();
         this.seekTo(
-            (this.getExpectedCurrentTime() + PRELOAD_TIME) % this.getDuration()
+            (this.getExpectedCurrentTime() + this.config.preloadTime) %
+                this.getDuration()
         );
         this.pauseVideo();
         this.state$.next('synchronizing');
@@ -71,7 +77,7 @@ export class SynchronizedPlayer {
             this.state$.next('playing');
 
             this.clearSynchronisationTimeout();
-        }, PRELOAD_TIME - this.synchronisationTime);
+        }, this.config.preloadTime - this.synchronisationTime);
     }
 
     private clearSynchronisationTimeout() {
@@ -94,18 +100,15 @@ export class SynchronizedPlayer {
     }
 
     private getExpectedCurrentTime() {
-        return (Date.now() + this.synchronisationOffset) % this.getDuration();
+        return (
+            (Date.now() + this.config.synchronisationOffset) %
+            this.getDuration()
+        );
     }
 
     public destroy() {
         this.destroyed.next();
     }
 }
-
-/**
- * The time yt needs (approximately) to buffer the videostream so that it doesn't stop after playing
- * TODO: check with player.getVideoLoadedFraction
- */
-const PRELOAD_TIME = 3000;
 
 export type SynchronizedPlayerState = 'synchronizing' | 'paused' | 'playing';

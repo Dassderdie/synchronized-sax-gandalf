@@ -8,6 +8,11 @@ export class SyncDifferenceEstimator {
      */
     public readonly stuck$ = new Subject();
 
+    constructor(
+        private stuckDeviation: number,
+        private syncPrecision: number
+    ) {}
+
     public addDeviation(deviation: number) {
         this.lastDeviations.shift();
         this.lastDeviations.push(deviation);
@@ -22,7 +27,7 @@ export class SyncDifferenceEstimator {
                 // ignore the first 3 elements because they have (likely) are likely inaccurate because of the synchronisation
                 (this.lastDeviations as number[]).slice(3)
             );
-            if (Math.abs(estimatedSyncTimeDifference) > 20) {
+            if (Math.abs(estimatedSyncTimeDifference) > this.syncPrecision) {
                 this.estimatedSyncTimeDifference = estimatedSyncTimeDifference;
             } else if (this.lastDeviations.length < 12) {
                 this.lastDeviations.unshift(null);
@@ -35,7 +40,7 @@ export class SyncDifferenceEstimator {
                 .every(
                     (lastDeviation) =>
                         typeof lastDeviation === 'number' &&
-                        Math.abs(deviation) > MAXIMUM_DEVIATION
+                        Math.abs(deviation) > this.stuckDeviation
                 )
         ) {
             this.stuck$.next();
@@ -55,5 +60,3 @@ function median(array: number[]) {
         ? sortedArray[mid - 0.5]
         : (sortedArray[mid - 1] + sortedArray[mid]) / 2;
 }
-
-const MAXIMUM_DEVIATION = 3000;

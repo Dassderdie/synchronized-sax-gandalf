@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { Input } from '@angular/core';
 import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { SynchronizedPlayerConfiguration } from '../synchronized-player-configuration';
 import { SynchronizedPlayer } from './../synchronized-player';
 import { YoutubePlayerApiService } from './youtube-player-api.service';
 
@@ -19,7 +20,7 @@ import { YoutubePlayerApiService } from './youtube-player-api.service';
 })
 export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
     @Input() videoId!: string;
-    @Input() synchronisationOffset = 0;
+    @Input() synchronizedPlayerConfig?: SynchronizedPlayerConfiguration;
 
     @ViewChild('playerPlaceholder')
     playerPlaceholder!: ElementRef<HTMLDivElement>;
@@ -58,32 +59,36 @@ export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
     ngOnChanges(changes: SimpleChanges) {
         // TODO: test
         if (changes.videoId && this.player) {
-            this.player?.loadVideoById(this.videoId);
+            this.player.loadVideoById(this.videoId);
         }
-        if (changes.synchronisationOffset && this.synchronizedPlayer) {
-            this.synchronizedPlayer.synchronisationOffset =
-                this.synchronisationOffset;
-            this.synchronizedPlayer.playSynchronized();
+        if (changes.synchronizedPlayerConfig && this.player) {
+            this.initSynchronizedPlayer();
         }
     }
 
     private onPlayerReady(event: YT.PlayerEvent) {
-            assert(!!this.player);
-            this.player.pauseVideo();
-            this.synchronizedPlayer = new SynchronizedPlayer(
-                this.synchronisationOffset,
-                () => {
-                    const duration = this.player!.getDuration() * 1000;
-                    assert(0 < duration);
-                    return duration;
-                },
-                (ms) => this.player!.seekTo(ms / 1000, true),
-                () => this.player!.getCurrentTime() * 1000,
-                () => this.player!.playVideo(),
-                () => this.player!.pauseVideo()
-            );
-            // because onPlayerReady is no event patched by zone.js
-            this.changeDetectorRef.detectChanges();
+        assert(!!this.player);
+        this.player.pauseVideo();
+        this.initSynchronizedPlayer();
+        // because onPlayerReady is no event patched by zone.js
+        this.changeDetectorRef.detectChanges();
+    }
+
+    public initSynchronizedPlayer() {
+        this.synchronizedPlayer?.destroy();
+        this.synchronizedPlayer = new SynchronizedPlayer(
+            this.synchronizedPlayerConfig ??
+                new SynchronizedPlayerConfiguration(),
+            () => {
+                const duration = this.player!.getDuration() * 1000;
+                assert(0 < duration);
+                return duration;
+            },
+            (ms) => this.player!.seekTo(ms / 1000, true),
+            () => this.player!.getCurrentTime() * 1000,
+            () => this.player!.playVideo(),
+            () => this.player!.pauseVideo()
+        );
     }
 
     public synchronize() {
