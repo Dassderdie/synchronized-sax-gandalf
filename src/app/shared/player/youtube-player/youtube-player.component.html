@@ -1,11 +1,26 @@
-<div style="position: absolute; top: 0">
-    <button (click)="synchronize()">Synchronize</button>
-    <button (click)="pause()">Pause</button>
-    <span style="background-color: rgba(255, 255, 255, 0.5)">
-        {{ synchronizedPlayer?.state$ | async }}
+<div #container>
+    <div style="position: absolute; top: 0">
+        <!-- <button (click)="pause()">Pause</button> -->
+        <span style="background-color: rgba(255, 255, 255, 0.5)">
+            {{ (synchronizedPlayer?.deviation$ | async) ?? '???' }}ms
+        </span>
+    </div>
+    <div
+        *ngIf="(synchronizedPlayer?.state$ | async) === 'synchronizing'"
+        style="
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.5);
+            padding: 10px;
+        "
+    >
+        <span style="font-size: xx-large; font-weight: bold">
+            Synchronizing...
+        </span>
+    </div>
 
-        {{ synchronizedPlayer?.deviation$ | async }}ms
-    </span>
+    <!-- Gets replaced by an iframe with the youtube player -->
+    <div #playerPlaceholder></div>
 </div>
-<!-- Gets replaced by an iframe with the youtube player -->
-<div #playerPlaceholder></div>

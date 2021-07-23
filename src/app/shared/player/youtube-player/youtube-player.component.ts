@@ -22,6 +22,7 @@ export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
     @Input() videoId!: string;
     @Input() synchronizedPlayerConfig?: SynchronizedPlayerConfiguration;
 
+    @ViewChild('container') containerRef!: ElementRef<HTMLDivElement>;
     @ViewChild('playerPlaceholder')
     playerPlaceholder!: ElementRef<HTMLDivElement>;
     private player?: YT.Player;
@@ -33,11 +34,12 @@ export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
     ) {}
 
     async ngAfterViewInit() {
+        const containerWidth = this.containerRef.nativeElement.clientWidth;
         this.player = await this.youtubePlayerApiService.createYtPlayer(
             this.playerPlaceholder.nativeElement,
             {
-                height: '390',
-                width: '640',
+                width: containerWidth.toString(),
+                height: (containerWidth / (16 / 9)).toString(),
                 videoId: this.videoId,
                 playerVars: {
                     // TODO: change to enums (currently they are not correctly transpiled to js?)
@@ -89,10 +91,6 @@ export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
             () => this.player!.playVideo(),
             () => this.player!.pauseVideo()
         );
-    }
-
-    public synchronize() {
-        this.synchronizedPlayer?.play();
     }
 
     public pause() {
