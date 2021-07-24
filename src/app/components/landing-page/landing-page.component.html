@@ -1,14 +1,42 @@
-<mat-grid-list cols="2" rowHeight="2:1">
-    <mat-grid-tile>
-        <iframe [src]="demoUrl" style="width: 100%; height: 100%"></iframe>
-    </mat-grid-tile>
-    <mat-grid-tile>
-        <iframe [src]="demoUrl" style="width: 100%; height: 100%"></iframe>
-    </mat-grid-tile>
-    <mat-grid-tile>
-        <iframe [src]="demoUrl" style="width: 100%; height: 100%"></iframe>
-    </mat-grid-tile>
-    <mat-grid-tile>
-        <iframe [src]="demoUrl" style="width: 100%; height: 100%"></iframe>
-    </mat-grid-tile>
-</mat-grid-list>
+<mat-toolbar>
+    <span>Synchronized Sax Gandalf</span>
+</mat-toolbar>
+
+<br />
+<br />
+<div class="container">
+    <mat-expansion-panel>
+        <mat-expansion-panel-header>
+            <mat-panel-title> Demo </mat-panel-title>
+        </mat-expansion-panel-header>
+        <mat-grid-list cols="2" rowHeight="2:1">
+            <mat-grid-tile>
+                <iframe
+                    [src]="demoUrl"
+                    style="width: 100%; height: 100%"
+                ></iframe>
+            </mat-grid-tile>
+            <mat-grid-tile>
+                <iframe
+                    [src]="demoUrl"
+                    style="width: 100%; height: 100%"
+                ></iframe>
+            </mat-grid-tile>
+            <mat-grid-tile>
+                <iframe
+                    [src]="demoUrl"
+                    style="width: 100%; height: 100%"
+                ></iframe>
+            </mat-grid-tile>
+            <mat-grid-tile>
+                <iframe
+                    [src]="demoUrl"
+                    style="width: 100%; height: 100%"
+                ></iframe>
+            </mat-grid-tile>
+        </mat-grid-list>
+    </mat-expansion-panel>
+
+    <br />
+    <app-production-player></app-production-player>
+</div>

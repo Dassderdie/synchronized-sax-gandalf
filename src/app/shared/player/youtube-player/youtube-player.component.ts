@@ -59,7 +59,6 @@ export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        // TODO: test
         if (changes.videoId && this.player) {
             this.player.loadVideoById(this.videoId);
         }

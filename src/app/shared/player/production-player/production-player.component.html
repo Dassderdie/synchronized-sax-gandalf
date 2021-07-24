@@ -1,0 +1,8 @@
+<div>
+    <mat-form-field appearance="fill" style="width: 200px">
+        <mat-label>Video-Id</mat-label>
+        <input matInput [(ngModel)]="videoId" />
+    </mat-form-field>
+</div>
+
+<app-youtube-player [videoId]="videoId"></app-youtube-player>
