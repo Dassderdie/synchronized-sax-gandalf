@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 
 import { LandingPageRoutingModule } from './landing-page-routing.module';
 import { LandingPageComponent } from './landing-page.component';
-import { MatGridListModule } from '@angular/material/grid-list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { ProductionPlayerModule } from '../../shared/player/production-player/production-player.module';
@@ -13,7 +12,6 @@ import { ProductionPlayerModule } from '../../shared/player/production-player/pr
     imports: [
         CommonModule,
         LandingPageRoutingModule,
-        MatGridListModule,
         MatExpansionModule,
         MatToolbarModule,
         ProductionPlayerModule,
