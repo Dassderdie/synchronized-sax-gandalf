@@ -9,7 +9,7 @@ import { SyncDifferenceEstimator } from './sync-difference-estimator';
 export class SynchronizedPlayer {
     private readonly destroyed = new Subject();
 
-    private isPaused = false;
+    private isPaused = true;
     public readonly state$ = new ReplaySubject<SynchronizedPlayerState>(1);
     /**
      * The current deviation from the "base" timeline
@@ -26,23 +26,23 @@ export class SynchronizedPlayer {
         private readonly playVideo: () => void,
         private readonly pauseVideo: () => void
     ) {
-        this.playSynchronized();
         this.syncDifferenceEstimator = new SyncDifferenceEstimator(
             config.stuckDeviation,
             config.syncPrecision
         );
         this.syncDifferenceEstimator.stuck$
-            .pipe(takeUntil(this.destroyed))
+            .pipe(
+                filter(() => !this.isPaused),
+                takeUntil(this.destroyed)
+            )
             .subscribe(() => {
-                console.log('stuck');
-
                 this.playSynchronized();
                 this.syncDifferenceEstimator.synchronizing();
             });
         interval(500)
             .pipe(
                 takeUntil(this.destroyed),
-                filter(() => !this.synchronisationTimeout)
+                filter(() => !this.synchronisationTimeout && !this.isPaused)
             )
             .subscribe(() => {
                 const expectedTime = this.getExpectedCurrentTime();
@@ -60,7 +60,7 @@ export class SynchronizedPlayer {
     }
 
     private synchronisationTimeout?: ReturnType<typeof setTimeout>;
-    public playSynchronized() {
+    private playSynchronized() {
         this.clearSynchronisationTimeout();
         if (this.isPaused) {
             return;

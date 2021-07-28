@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Subject } from 'rxjs';
 
 @Component({
     selector: 'app-production-player',
@@ -9,4 +10,6 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 export class ProductionPlayerComponent {
     constructor() {}
     public videoId = 'BBGEG21CGo0';
+    public isPaused = true;
+    public fullscreen$ = new Subject();
 }

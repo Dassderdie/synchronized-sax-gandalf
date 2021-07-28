@@ -8,6 +8,8 @@ import {
 } from '@angular/core';
 import { Input } from '@angular/core';
 import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Observable, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { SynchronizedPlayerConfiguration } from '../synchronized-player-configuration';
 import { SynchronizedPlayer } from './../synchronized-player';
 import { YoutubePlayerApiService } from './youtube-player-api.service';
@@ -21,11 +23,15 @@ import { YoutubePlayerApiService } from './youtube-player-api.service';
 export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
     @Input() videoId!: string;
     @Input() synchronizedPlayerConfig?: SynchronizedPlayerConfiguration;
+    @Input() isPaused = true;
+    @Input() fullscreen$?: Observable<unknown>;
 
     @ViewChild('container') containerRef!: ElementRef<HTMLDivElement>;
     @ViewChild('playerPlaceholder')
-    playerPlaceholder!: ElementRef<HTMLDivElement>;
+    private playerPlaceholder!: ElementRef<HTMLDivElement>;
     private player?: YT.Player;
+    private resizeObserver?: ResizeObserver;
+    private destroyed = new Subject();
     public synchronizedPlayer?: SynchronizedPlayer;
 
     constructor(
@@ -56,6 +62,10 @@ export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
                 },
             }
         );
+        this.resizeObserver = new ResizeObserver((entries) => {
+            this.updateSize();
+        });
+        this.resizeObserver.observe(this.containerRef.nativeElement);
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -64,6 +74,21 @@ export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
         }
         if (changes.synchronizedPlayerConfig && this.player) {
             this.initSynchronizedPlayer();
+        }
+        if (changes.isPaused && this.synchronizedPlayer) {
+            if (this.isPaused) {
+                this.synchronizedPlayer.pause();
+            } else {
+                this.synchronizedPlayer.play();
+            }
+        }
+        if (changes.fullscreen$) {
+            assert(changes.fullscreen$.isFirstChange());
+            this.fullscreen$?.pipe(takeUntil(this.destroyed)).subscribe(() => {
+                this.containerRef.nativeElement.requestFullscreen({
+                    navigationUI: 'hide',
+                });
+            });
         }
     }
 
@@ -75,7 +100,7 @@ export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
         this.changeDetectorRef.detectChanges();
     }
 
-    public initSynchronizedPlayer() {
+    private initSynchronizedPlayer() {
         this.synchronizedPlayer?.destroy();
         this.synchronizedPlayer = new SynchronizedPlayer(
             this.synchronizedPlayerConfig ??
@@ -90,13 +115,20 @@ export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
             () => this.player!.playVideo(),
             () => this.player!.pauseVideo()
         );
+        if (!this.isPaused) {
+            this.synchronizedPlayer.play();
+        }
     }
 
-    public pause() {
-        this.synchronizedPlayer?.pause();
+    private updateSize() {
+        const containerWidth = this.containerRef.nativeElement.clientWidth;
+        this.player?.setSize(containerWidth, containerWidth / (16 / 9));
     }
 
     ngOnDestroy() {
         this.synchronizedPlayer?.destroy();
+        this.resizeObserver?.disconnect();
+        this.destroyed.next();
+        this.destroyed.complete();
     }
 }

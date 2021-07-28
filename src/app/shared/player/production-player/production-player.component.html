@@ -3,6 +3,27 @@
         <mat-label>Video-Id</mat-label>
         <input matInput [(ngModel)]="videoId" />
     </mat-form-field>
+    <button
+        mat-flat-button
+        (click)="isPaused = !isPaused"
+        color="primary"
+        style="margin-left: 3px"
+    >
+        {{ isPaused ? 'Start' : 'Pause' }}
+    </button>
+    <button
+        *ngIf="!isPaused"
+        mat-flat-button
+        (click)="fullscreen$.next()"
+        color="primary"
+        style="margin-left: 3px"
+    >
+        Fullscreen
+    </button>
 </div>
 
-<app-youtube-player [videoId]="videoId"></app-youtube-player>
+<app-youtube-player
+    [videoId]="videoId"
+    [isPaused]="isPaused"
+    [fullscreen$]="fullscreen$"
+></app-youtube-player>
