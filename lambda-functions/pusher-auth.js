@@ -27,7 +27,7 @@ exports.handler = function (event, context, callback) {
         },
         body: JSON.stringify(
             pusher.authenticate(params.socket_id, params.channel_name, {
-                id: uuid(),
+                user_id: uuid(),
             })
         ),
     });
