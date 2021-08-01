@@ -1,3 +1,3 @@
 # SynchronizedSaxGandalf
 
-[DEMO](https://dassderdie.github.io/synchronized-sax-gandalf/)
+[DEMO](https://synchronized-sax-gandalf.netlify.app)
