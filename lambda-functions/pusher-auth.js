@@ -10,17 +10,25 @@ const pusher = new Pusher({
 
 // I used https://github.com/NathanHeffley/pointer/blob/f12442f416ae9aa3929482142650b358bf50c1ca/src/functions/auth.js as inspiration
 exports.handler = function (event, context, callback) {
-    console.log(event, event.queryStringParameters);
-    const socketId = event.body.socket_id;
-    const channel = event.body.channel_name;
-    const auth = JSON.stringify(pusher.authenticate(socketId, channel));
-    const authCallback = query.callback.replace(/\"/g, '') + '(' + auth + ');';
+    // event.body is something like this: 'socket_id=131839.71195980&channel_name=private-channel'
+    const params = event.body.split('&').reduce((previousValue, keyValue) => {
+        const [key, value] = keyValue.split('=');
+        return {
+            ...previousValue,
+            [key]: value,
+        };
+    }, {});
+
+    const socketId = params.socket_id;
+    const channel = params.channel_name;
+    const auth = pusher.authenticate(socketId, channel);
+    console.log(auth);
 
     callback(null, {
         statusCode: 200,
         headers: {
             'Content-Type': 'application/javascript',
         },
-        body: authCallback,
+        body: auth,
     });
 };
