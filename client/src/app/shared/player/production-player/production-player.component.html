@@ -12,6 +12,15 @@
         {{ isPaused ? 'Start' : 'Pause' }}
     </button>
     <button
+        mat-flat-button
+        (click)="syncTime()"
+        color="primary"
+        style="margin-left: 3px"
+    >
+        {{ syncingTime ? 'sync' : 'syncing' }}
+        - {{ config.synchronisationOffset }}ms
+    </button>
+    <button
         *ngIf="!isPaused"
         mat-flat-button
         (click)="fullscreen$.next()"
@@ -26,4 +35,5 @@
     [videoId]="videoId"
     [isPaused]="isPaused"
     [fullscreen$]="fullscreen$"
+    [synchronizedPlayerConfig]="config"
 ></app-youtube-player>

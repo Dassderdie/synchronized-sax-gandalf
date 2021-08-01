@@ -1,4 +1,5 @@
-Pusher = require('pusher');
+const Pusher = require('pusher');
+const uuid = require('uuid').v4;
 
 const pusher = new Pusher({
     appId: process.env.PUSHER_APP_ID,
@@ -19,14 +20,15 @@ exports.handler = function (event, context, callback) {
         };
     }, {});
 
-    const socketId = params.socket_id;
-    const channel = params.channel_name;
-
     callback(null, {
         statusCode: 200,
         headers: {
             'Content-Type': 'application/javascript',
         },
-        body: JSON.stringify(pusher.authenticate(socketId, channel)),
+        body: JSON.stringify(
+            pusher.authenticate(params.socket_id, params.channel_name, {
+                id: uuid(),
+            })
+        ),
     });
 };
