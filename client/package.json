@@ -29,6 +29,7 @@
         "@angular/service-worker": "~12.1.1",
         "bootstrap": "^5.0.2",
         "lodash-es": "^4.17.21",
+        "pusher-js": "^7.0.3",
         "rxjs": "~6.6.0",
         "tslib": "^2.2.0",
         "zone.js": "~0.11.4"

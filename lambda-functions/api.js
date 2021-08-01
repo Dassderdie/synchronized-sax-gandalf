@@ -5,10 +5,15 @@ const pusher = new Pusher({
     key: process.env.PUSHER_KEY,
     secret: process.env.PUSHER_SECRET,
     cluster: process.env.PUSHER_CLUSTER,
+    useTLS: true,
 });
 
 export default (req, res) => {
-    const auth = pusher.authenticate(req.body.socket_id, req.body.channel_name);
+    pusher.trigger('my-channel', 'my-event', {
+        message: 'hello world',
+    });
 
-    res.send(auth);
+    // const auth = pusher.authenticate(req.body.socket_id, req.body.channel_name);
+
+    // res.send(auth);
 };
