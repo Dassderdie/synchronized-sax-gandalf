@@ -1,4 +1,4 @@
-import Pusher from 'pusher';
+Pusher = require('pusher');
 
 const pusher = new Pusher({
     appId: process.env.PUSHER_APP_ID,
@@ -9,11 +9,8 @@ const pusher = new Pusher({
 });
 
 export default (req, res) => {
-    pusher.trigger('my-channel', 'my-event', {
-        message: 'hello world',
-    });
-
-    // const auth = pusher.authenticate(req.body.socket_id, req.body.channel_name);
-
-    // res.send(auth);
+    const socketId = req.body.socket_id;
+    const channel = req.body.channel_name;
+    const auth = pusher.authenticate(socketId, channel);
+    res.send(auth);
 };
