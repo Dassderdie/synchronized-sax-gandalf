@@ -22,7 +22,6 @@ exports.handler = function (event, context, callback) {
     const socketId = params.socket_id;
     const channel = params.channel_name;
     const auth = pusher.authenticate(socketId, channel);
-    console.log(auth);
 
     callback(null, {
         statusCode: 200,
