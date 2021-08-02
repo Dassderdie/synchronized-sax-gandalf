@@ -1,0 +1,8 @@
+{
+    "/.netlify/functions/pusher-auth": {
+        "target": "https://synchronized-sax-gandalf.netlify.app/",
+        "secure": false,
+        "ws": true,
+        "changeOrigin": true
+    }
+}
