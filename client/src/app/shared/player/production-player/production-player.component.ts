@@ -1,4 +1,8 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import {
+    Component,
+    ChangeDetectionStrategy,
+    ChangeDetectorRef,
+} from '@angular/core';
 import { Subject } from 'rxjs';
 import { PusherService } from 'src/app/core/pusher.service';
 import { SynchronizedPlayerConfiguration } from '../synchronized-player-configuration';
@@ -10,22 +14,45 @@ import { SynchronizedPlayerConfiguration } from '../synchronized-player-configur
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductionPlayerComponent {
-    constructor(private readonly pusherService: PusherService) {}
+    constructor(
+        private readonly pusherService: PusherService,
+        private readonly changeDetectorRef: ChangeDetectorRef
+    ) {}
+
+    public isLeader = true;
+    public channelId = 'abcdef';
+
+    public started = false;
+    public async start() {
+        await this.pusherService.initialize(
+            this.channelId,
+            this.isLeader ? 'leader' : 'follower'
+        );
+        this.started = true;
+        this.changeDetectorRef.markForCheck();
+        this.syncTime();
+    }
 
     public videoId = 'BBGEG21CGo0';
     public isPaused = true;
     public fullscreen$ = new Subject();
     public config = new SynchronizedPlayerConfiguration();
 
-    public syncingTime?: Promise<number>;
+    public syncingTime?: Promise<number | undefined>;
     public async syncTime() {
         this.syncingTime = this.pusherService.getTimeOffset();
+
         const offset = await this.syncingTime;
         console.log(offset);
+        this.syncingTime = undefined;
+        if (typeof offset !== 'number') {
+            console.log('Mode not set!');
+            return;
+        }
         this.config = {
             ...this.config,
             synchronisationOffset: offset,
         };
-        this.syncingTime = undefined;
+        this.changeDetectorRef.markForCheck();
     }
 }

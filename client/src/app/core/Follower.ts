@@ -2,6 +2,8 @@ import { PresenceChannel } from 'pusher-js';
 import { SyncTimeMessage } from './sync-time-message';
 
 export class Follower {
+    public readonly type = 'Follower';
+
     constructor(private readonly channel: PresenceChannel) {}
 
     private timeOffsetPromise?: Promise<number>;
@@ -51,5 +53,9 @@ export class Follower {
             startFollowerTimestamp: Date.now(),
         };
         this.channel.trigger('client-syncTime', message);
+    }
+
+    public destroy() {
+        this.channel.disconnect();
     }
 }

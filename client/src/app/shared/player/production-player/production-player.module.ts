@@ -5,6 +5,7 @@ import { YoutubePlayerModule } from '../youtube-player/youtube-player.module';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 @NgModule({
     declarations: [ProductionPlayerComponent],
@@ -14,6 +15,7 @@ import { MatButtonModule } from '@angular/material/button';
         MatInputModule,
         FormsModule,
         MatButtonModule,
+        MatSlideToggleModule,
     ],
     exports: [ProductionPlayerComponent],
 })

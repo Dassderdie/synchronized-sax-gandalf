@@ -8,27 +8,41 @@ import { Leader } from './Leader';
     providedIn: 'root',
 })
 export class PusherService {
-    public channelId = 'abcde';
-    private pusherApi: Leader | Follower;
+    private pusherApi?: Leader | Follower;
+    private pusher: Pusher;
 
     constructor() {
-        const pusher = new Pusher(environment.pusher.key, {
+        this.pusher = new Pusher(environment.pusher.key, {
             cluster: environment.pusher.cluster,
             authEndpoint: '.netlify/functions/pusher-auth',
         });
+    }
 
-        const channel = pusher.subscribe(
-            `presence-${this.channelId}`
+    /**
+     * @returns a Promise that resolve ones the connection has been successfully established
+     */
+    public async initialize(channelId: string, role: 'leader' | 'follower') {
+        if (this.pusherApi) {
+            this.pusherApi.destroy();
+        }
+        const channel = this.pusher.subscribe(
+            `presence-${channelId}`
         ) as PresenceChannel;
-        if (channel.members.count === 0) {
+        channel.subscriptionPending;
+        if (role === 'leader') {
             this.pusherApi = new Leader(channel);
         } else {
             this.pusherApi = new Follower(channel);
         }
+        return new Promise((resolve, reject) =>
+            channel.bind('pusher:subscription_succeeded', () => {
+                resolve(null);
+            })
+        );
     }
 
-    public getTimeOffset() {
-        return this.pusherApi.getTimeOffset();
+    public async getTimeOffset() {
+        return this.pusherApi?.getTimeOffset();
     }
 }
 
