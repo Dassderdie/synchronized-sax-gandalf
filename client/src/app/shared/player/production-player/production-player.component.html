@@ -4,7 +4,9 @@
         <input matInput [(ngModel)]="channelId" />
     </mat-form-field>
 
-    <mat-slide-toggle [(ngModel)]="isLeader"> Leader </mat-slide-toggle>
+    <mat-slide-toggle [(ngModel)]="forceLeader">
+        Force Leader
+    </mat-slide-toggle>
     <br />
     <button
         mat-flat-button
@@ -19,7 +21,9 @@
 <ng-template #player>
     <div>
         Channel-Id: {{ channelId }} <br />
-        {{ isLeader ? 'Leader' : 'Follower' }} <br />
+        {{ pusherService.type$ | async }} <br />
+        Members on this channel: {{ pusherService.numberOfMembers$ | async }}
+        <br />
         <mat-form-field appearance="fill" style="width: 200px">
             <mat-label>Video-Id</mat-label>
             <input matInput [(ngModel)]="videoId" />

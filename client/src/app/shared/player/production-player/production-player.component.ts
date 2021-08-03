@@ -15,19 +15,16 @@ import { SynchronizedPlayerConfiguration } from '../synchronized-player-configur
 })
 export class ProductionPlayerComponent {
     constructor(
-        private readonly pusherService: PusherService,
+        public readonly pusherService: PusherService,
         private readonly changeDetectorRef: ChangeDetectorRef
     ) {}
 
-    public isLeader = true;
+    public forceLeader = false;
     public channelId = 'abcdef';
 
     public started = false;
     public async start() {
-        await this.pusherService.initialize(
-            this.channelId,
-            this.isLeader ? 'leader' : 'follower'
-        );
+        await this.pusherService.initialize(this.channelId, this.forceLeader);
         this.started = true;
         this.changeDetectorRef.markForCheck();
         this.syncTime();
