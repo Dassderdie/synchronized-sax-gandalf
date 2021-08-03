@@ -1,0 +1,48 @@
+<div *ngIf="status === 'idle'">
+    <mat-form-field appearance="fill" style="width: 200px">
+        <mat-label>Channel-Id</mat-label>
+        <input matInput [(ngModel)]="channelId" />
+    </mat-form-field>
+
+    <mat-slide-toggle
+        style="margin-left: 20px"
+        color="secondary"
+        [(ngModel)]="forceLeader"
+    >
+        Force Leader (Advanced)
+    </mat-slide-toggle>
+    <br />
+    <button
+        mat-flat-button
+        (click)="start()"
+        color="primary"
+        style="margin-left: 3px"
+    >
+        Start
+    </button>
+    <br />
+</div>
+<mat-spinner *ngIf="status === 'starting'"></mat-spinner>
+<div *ngIf="status === 'started'">
+    Channel-Id: {{ channelId }} - {{ pusherService.type$ | async }}
+    <br />
+    Members on this channel: {{ pusherService.numberOfMembers$ | async }} <br />
+    <ng-container *ngIf="(pusherService.type$ | async) === 'Follower'">
+        System time offset: {{ systemTimeOffset }}ms
+        <button
+            mat-flat-button
+            (click)="syncTime()"
+            color="secondary"
+            style="margin-left: 3px"
+        >
+            Synchronize
+            <mat-spinner *ngIf="syncingTime" color="secondary"></mat-spinner>
+        </button>
+    </ng-container>
+    <br />
+    <app-production-player
+        *ngIf="systemTimeOffset !== undefined"
+        [videoId]="videoId"
+        [systemTimeOffset]="systemTimeOffset"
+    ></app-production-player>
+</div>

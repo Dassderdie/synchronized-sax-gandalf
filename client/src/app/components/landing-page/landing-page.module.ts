@@ -5,7 +5,7 @@ import { LandingPageRoutingModule } from './landing-page-routing.module';
 import { LandingPageComponent } from './landing-page.component';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { ProductionPlayerModule } from '../../shared/player/production-player/production-player.module';
+import { ChannelModule } from 'src/app/shared/channel/channel.module';
 
 @NgModule({
     declarations: [LandingPageComponent],
@@ -14,7 +14,7 @@ import { ProductionPlayerModule } from '../../shared/player/production-player/pr
         LandingPageRoutingModule,
         MatExpansionModule,
         MatToolbarModule,
-        ProductionPlayerModule,
+        ChannelModule,
     ],
 })
 export class LandingPageModule {}

@@ -1,65 +1,26 @@
-<div *ngIf="!started; else player">
-    <mat-form-field appearance="fill" style="width: 200px">
-        <mat-label>Channel-Id</mat-label>
-        <input matInput [(ngModel)]="channelId" />
-    </mat-form-field>
-
-    <mat-slide-toggle [(ngModel)]="forceLeader">
-        Force Leader
-    </mat-slide-toggle>
-    <br />
+<div>
     <button
         mat-flat-button
-        (click)="start()"
+        (click)="isPaused = !isPaused"
         color="primary"
         style="margin-left: 3px"
     >
-        Start
+        {{ isPaused ? 'Play' : 'Pause' }}
+    </button>
+    <button
+        *ngIf="!isPaused"
+        mat-flat-button
+        (click)="fullscreen$.next()"
+        color="primary"
+        style="margin-left: 3px"
+    >
+        Fullscreen
     </button>
 </div>
 
-<ng-template #player>
-    <div>
-        Channel-Id: {{ channelId }} <br />
-        {{ pusherService.type$ | async }} <br />
-        Members on this channel: {{ pusherService.numberOfMembers$ | async }}
-        <br />
-        <mat-form-field appearance="fill" style="width: 200px">
-            <mat-label>Video-Id</mat-label>
-            <input matInput [(ngModel)]="videoId" />
-        </mat-form-field>
-        <button
-            mat-flat-button
-            (click)="isPaused = !isPaused"
-            color="primary"
-            style="margin-left: 3px"
-        >
-            {{ isPaused ? 'Start' : 'Pause' }}
-        </button>
-        <button
-            mat-flat-button
-            (click)="syncTime()"
-            color="primary"
-            style="margin-left: 3px"
-        >
-            {{ syncingTime ? 'sync' : 'syncing' }}
-            - {{ config.synchronisationOffset }}ms
-        </button>
-        <button
-            *ngIf="!isPaused"
-            mat-flat-button
-            (click)="fullscreen$.next()"
-            color="primary"
-            style="margin-left: 3px"
-        >
-            Fullscreen
-        </button>
-    </div>
-
-    <app-youtube-player
-        [videoId]="videoId"
-        [isPaused]="isPaused"
-        [fullscreen$]="fullscreen$"
-        [synchronizedPlayerConfig]="config"
-    ></app-youtube-player>
-</ng-template>
+<app-youtube-player
+    [videoId]="videoId"
+    [isPaused]="isPaused"
+    [fullscreen$]="fullscreen$"
+    [synchronizedPlayerConfig]="config"
+></app-youtube-player>

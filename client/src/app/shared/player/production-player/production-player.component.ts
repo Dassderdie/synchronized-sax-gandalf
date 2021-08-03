@@ -1,10 +1,6 @@
-import {
-    Component,
-    ChangeDetectionStrategy,
-    ChangeDetectorRef,
-} from '@angular/core';
+import { SimpleChanges } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
 import { Subject } from 'rxjs';
-import { PusherService } from 'src/app/core/pusher.service';
 import { SynchronizedPlayerConfiguration } from '../synchronized-player-configuration';
 
 @Component({
@@ -14,42 +10,19 @@ import { SynchronizedPlayerConfiguration } from '../synchronized-player-configur
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductionPlayerComponent {
-    constructor(
-        public readonly pusherService: PusherService,
-        private readonly changeDetectorRef: ChangeDetectorRef
-    ) {}
+    @Input() systemTimeOffset!: number;
+    @Input() videoId!: string;
 
-    public forceLeader = false;
-    public channelId = 'abcdef';
-
-    public started = false;
-    public async start() {
-        await this.pusherService.initialize(this.channelId, this.forceLeader);
-        this.started = true;
-        this.changeDetectorRef.markForCheck();
-        this.syncTime();
-    }
-
-    public videoId = 'BBGEG21CGo0';
     public isPaused = true;
     public fullscreen$ = new Subject();
     public config = new SynchronizedPlayerConfiguration();
 
-    public syncingTime?: Promise<number | undefined>;
-    public async syncTime() {
-        this.syncingTime = this.pusherService.getTimeOffset();
-
-        const offset = await this.syncingTime;
-        console.log(offset);
-        this.syncingTime = undefined;
-        if (typeof offset !== 'number') {
-            console.log('Mode not set!');
-            return;
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes.systemTimeOffset) {
+            this.config = {
+                ...this.config,
+                synchronisationOffset: this.systemTimeOffset,
+            };
         }
-        this.config = {
-            ...this.config,
-            synchronisationOffset: offset,
-        };
-        this.changeDetectorRef.markForCheck();
     }
 }

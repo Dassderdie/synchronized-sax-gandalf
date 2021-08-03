@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import Pusher, { PresenceChannel } from 'pusher-js';
 import { ReplaySubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
