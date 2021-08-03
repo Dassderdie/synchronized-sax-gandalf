@@ -1,6 +1,6 @@
 import { Injectable, NgZone } from '@angular/core';
 import Pusher, { PresenceChannel } from 'pusher-js';
-import { ReplaySubject } from 'rxjs';
+import { Observable, ReplaySubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { Follower } from './Follower';
 import { Leader } from './Leader';
@@ -13,6 +13,7 @@ export class PusherService {
     private pusher: Pusher;
     public readonly type$ = new ReplaySubject<'Follower' | 'Leader'>(1);
     public readonly numberOfMembers$ = new ReplaySubject<number>(1);
+    public readonly videoId$ = new ReplaySubject<string>(1);
 
     constructor() {
         this.pusher = new Pusher(environment.pusher.key, {
@@ -25,7 +26,11 @@ export class PusherService {
      * @returns a Promise that resolve ones the connection has been successfully established
      * @param forceLeader wether the role should be forced to be a leader
      */
-    public async initialize(channelId: string, forceLeader?: boolean) {
+    public async initialize(
+        channelId: string,
+        videoId: string,
+        forceLeader?: boolean
+    ) {
         if (this.pusherApi) {
             this.pusherApi.destroy();
         }
@@ -36,10 +41,11 @@ export class PusherService {
             channel.bind('pusher:subscription_succeeded', () => {
                 // TODO: there are many edge cases where this could go wrong
                 if (channel.members.count === 1 || forceLeader) {
-                    this.pusherApi = new Leader(channel);
+                    this.pusherApi = new Leader(channel, videoId);
                 } else {
                     this.pusherApi = new Follower(channel);
                 }
+                this.pusherApi.videoId$.subscribe(this.videoId$);
                 this.type$.next(this.pusherApi.type);
                 this.numberOfMembers$.next(channel.members.count);
                 channel.bind('pusher:member_added', () =>
@@ -55,6 +61,11 @@ export class PusherService {
 
     public async getTimeOffset() {
         return this.pusherApi?.getTimeOffset();
+    }
+
+    public setVideoId(nextVideoId: string) {
+        assert(this.pusherApi?.type === 'Leader');
+        this.pusherApi.setVideoId(nextVideoId);
     }
 }
 

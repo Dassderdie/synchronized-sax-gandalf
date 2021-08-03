@@ -1,10 +1,16 @@
 import { PresenceChannel } from 'pusher-js';
+import { PusherApi } from './pusher-api';
 import { SyncTimeMessage } from './sync-time-message';
 
-export class Follower {
+export class Follower extends PusherApi {
     public readonly type = 'Follower';
 
-    constructor(private readonly channel: PresenceChannel) {}
+    constructor(readonly channel: PresenceChannel) {
+        super();
+        channel.bind('client-video', (message: { videoId: string }) => {
+            this.videoId$.next(message.videoId);
+        });
+    }
 
     private timeOffsetPromise?: Promise<number>;
     public async getTimeOffset() {
@@ -53,9 +59,5 @@ export class Follower {
             startFollowerTimestamp: Date.now(),
         };
         this.channel.trigger('client-syncTime', message);
-    }
-
-    public destroy() {
-        this.channel.disconnect();
     }
 }

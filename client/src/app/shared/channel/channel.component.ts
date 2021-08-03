@@ -20,17 +20,26 @@ export class ChannelComponent {
 
     public forceLeader = false;
     public channelId = 'abcdef';
+    public readonly recommendedVideoIds = [
+        'BBGEG21CGo0',
+        's4lyelymLac',
+        'jRA1HBZhJ18',
+    ];
 
     public status: 'idle' | 'starting' | 'started' = 'idle';
     public async start() {
         this.status = 'starting';
-        await this.pusherService.initialize(this.channelId, this.forceLeader);
+        await this.pusherService.initialize(
+            this.channelId,
+            this.nextVideoId,
+            this.forceLeader
+        );
         this.status = 'started';
         this.changeDetectorRef.markForCheck();
         this.syncTime();
     }
 
-    public videoId = 'BBGEG21CGo0';
+    public nextVideoId = this.recommendedVideoIds[0];
     public systemTimeOffset?: number;
     public syncingTime?: Promise<number | undefined>;
     public async syncTime() {
@@ -44,5 +53,9 @@ export class ChannelComponent {
         }
         this.systemTimeOffset = offset;
         this.changeDetectorRef.markForCheck();
+    }
+
+    public setVideoId() {
+        this.pusherService.setVideoId(this.nextVideoId);
     }
 }

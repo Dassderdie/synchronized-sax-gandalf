@@ -8,6 +8,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ChannelComponent } from './channel.component';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 @NgModule({
     declarations: [ChannelComponent],
@@ -20,6 +21,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
         MatSlideToggleModule,
         MatExpansionModule,
         MatProgressSpinnerModule,
+        MatAutocompleteModule,
     ],
     exports: [ChannelComponent],
 })

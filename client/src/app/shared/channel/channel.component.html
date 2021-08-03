@@ -22,6 +22,28 @@
     </button>
     <br />
 </div>
+<div *ngIf="(pusherService.type$ | async) === 'Leader'">
+    <mat-form-field appearance="fill" style="width: 250px">
+        <mat-label>Video-Id</mat-label>
+        <input matInput [(ngModel)]="nextVideoId" [matAutocomplete]="auto" />
+        <mat-autocomplete #auto="matAutocomplete">
+            <mat-option
+                *ngFor="let videoId of recommendedVideoIds"
+                [value]="videoId"
+            >
+                {{ videoId }}
+            </mat-option>
+        </mat-autocomplete>
+    </mat-form-field>
+    <button
+        mat-flat-button
+        (click)="setVideoId()"
+        color="primary"
+        style="margin-left: 3px"
+    >
+        Set videoId
+    </button>
+</div>
 <mat-spinner *ngIf="status === 'starting'"></mat-spinner>
 <div *ngIf="status === 'started'">
     Channel-Id: {{ channelId }} - {{ pusherService.type$ | async }}
@@ -40,9 +62,11 @@
         </button>
     </ng-container>
     <br />
-    <app-production-player
-        *ngIf="systemTimeOffset !== undefined"
-        [videoId]="videoId"
-        [systemTimeOffset]="systemTimeOffset"
-    ></app-production-player>
+    <ng-container *ngIf="systemTimeOffset !== undefined">
+        <app-production-player
+            *ngIf="pusherService.videoId$ | async as videoId"
+            [videoId]="videoId"
+            [systemTimeOffset]="systemTimeOffset"
+        ></app-production-player>
+    </ng-container>
 </div>
