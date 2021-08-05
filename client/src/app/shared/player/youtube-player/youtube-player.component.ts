@@ -71,6 +71,9 @@ export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
     ngOnChanges(changes: SimpleChanges) {
         if (changes.videoId && this.player) {
             this.player.loadVideoById(this.videoId);
+            if (this.isPaused) {
+                this.player.pauseVideo();
+            }
         }
         if (changes.synchronizedPlayerConfig && this.player) {
             this.initSynchronizedPlayer();
