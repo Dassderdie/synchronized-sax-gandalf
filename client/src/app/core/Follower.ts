@@ -31,10 +31,10 @@ export class Follower extends PusherApi {
                                 (response.leaderTimestamp! - receiveTime)) /
                             2;
                         offsets.push(offset);
-                        if (offsets.length > 5) {
+                        if (offsets.length >= 7) {
                             const normalizedOffsets = offsets
-                                .sort()
-                                .slice(1, -2);
+                                .sort((a, b) => a - b)
+                                .slice(2, -2);
                             resolve(
                                 normalizedOffsets.reduce(
                                     (sum, current) => sum + current
