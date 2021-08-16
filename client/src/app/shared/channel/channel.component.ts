@@ -1,10 +1,11 @@
 import {
     Component,
-    OnInit,
     ChangeDetectionStrategy,
     ChangeDetectorRef,
 } from '@angular/core';
+import { cloneDeep } from 'lodash-es';
 import { PusherService } from 'src/app/core/pusher.service';
+import { VideoSettings } from 'src/app/core/video-settings';
 
 @Component({
     selector: 'app-channel',
@@ -31,7 +32,7 @@ export class ChannelComponent {
         this.status = 'starting';
         await this.pusherService.initialize(
             this.channelId,
-            this.nextVideoId,
+            this.newVideoSettings,
             this.forceLeader
         );
         this.status = 'started';
@@ -39,7 +40,11 @@ export class ChannelComponent {
         this.syncTime();
     }
 
-    public nextVideoId = this.recommendedVideoIds[0];
+    public newVideoSettings: VideoSettings = {
+        videoId: this.recommendedVideoIds[0],
+        volume: 100,
+        playBackSpeed: 1,
+    };
     public systemTimeOffset?: number;
     public syncingTime?: Promise<number | undefined>;
     public async syncTime() {
@@ -55,7 +60,7 @@ export class ChannelComponent {
         this.changeDetectorRef.markForCheck();
     }
 
-    public setVideoId() {
-        this.pusherService.setVideoId(this.nextVideoId);
+    public setVideoSettings() {
+        this.pusherService.setVideoSettings(cloneDeep(this.newVideoSettings));
     }
 }

@@ -7,5 +7,4 @@ export class SynchronizedPlayerConfiguration {
      */
     preloadTime = 3000;
     syncPrecision = 20;
-    stuckDeviation = 3000;
 }

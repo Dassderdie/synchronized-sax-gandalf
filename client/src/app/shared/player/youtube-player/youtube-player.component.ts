@@ -10,6 +10,7 @@ import { Input } from '@angular/core';
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { VideoSettings } from 'src/app/core/video-settings';
 import { SynchronizedPlayerConfiguration } from '../synchronized-player-configuration';
 import { SynchronizedPlayer } from './../synchronized-player';
 import { YoutubePlayerApiService } from './youtube-player-api.service';
@@ -21,7 +22,7 @@ import { YoutubePlayerApiService } from './youtube-player-api.service';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
-    @Input() videoId!: string;
+    @Input() videoSettings!: VideoSettings;
     @Input() synchronizedPlayerConfig?: SynchronizedPlayerConfiguration;
     @Input() isPaused = true;
     @Input() fullscreen$?: Observable<unknown>;
@@ -46,7 +47,7 @@ export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
             {
                 width: containerWidth.toString(),
                 height: (containerWidth / (16 / 9)).toString(),
-                videoId: this.videoId,
+                videoId: this.videoSettings.videoId,
                 playerVars: {
                     // TODO: change to enums (currently they are not correctly transpiled to js?)
                     controls: 0,
@@ -55,7 +56,7 @@ export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
                     modestbranding: 1,
                     loop: 1,
                     // necessary to make the looping work
-                    playlist: this.videoId,
+                    playlist: this.videoSettings.videoId,
                 },
                 events: {
                     onReady: this.onPlayerReady.bind(this),
@@ -69,11 +70,13 @@ export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        if (changes.videoId && this.player) {
-            this.player.loadVideoById(this.videoId);
+        if (changes.videoSettings && this.player) {
+            this.player.loadVideoById(this.videoSettings);
             if (this.isPaused) {
                 this.player.pauseVideo();
             }
+            this.player.setPlaybackRate(this.videoSettings.playBackSpeed);
+            this.player.setVolume(this.videoSettings.volume);
         }
         if (changes.synchronizedPlayerConfig && this.player) {
             this.initSynchronizedPlayer();
@@ -97,6 +100,8 @@ export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
 
     private onPlayerReady(event: YT.PlayerEvent) {
         assert(!!this.player);
+        this.player.setPlaybackRate(this.videoSettings.playBackSpeed);
+        this.player.setVolume(this.videoSettings.volume);
         this.player.pauseVideo();
         this.initSynchronizedPlayer();
         // because onPlayerReady is no event patched by zone.js

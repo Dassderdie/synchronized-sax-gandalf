@@ -27,18 +27,8 @@ export class SynchronizedPlayer {
         private readonly pauseVideo: () => void
     ) {
         this.syncDifferenceEstimator = new SyncDifferenceEstimator(
-            config.stuckDeviation,
             config.syncPrecision
         );
-        this.syncDifferenceEstimator.stuck$
-            .pipe(
-                filter(() => !this.isPaused),
-                takeUntil(this.destroyed)
-            )
-            .subscribe(() => {
-                this.playSynchronized();
-                this.syncDifferenceEstimator.synchronizing();
-            });
         interval(500)
             .pipe(
                 takeUntil(this.destroyed),
@@ -51,7 +41,8 @@ export class SynchronizedPlayer {
                 this.syncDifferenceEstimator.addDeviation(deviation);
                 if (this.syncDifferenceEstimator.estimatedSyncTimeDifference) {
                     this.synchronisationTime +=
-                        this.syncDifferenceEstimator.estimatedSyncTimeDifference;
+                        this.syncDifferenceEstimator
+                            .estimatedSyncTimeDifference * 4;
                     this.playSynchronized();
                     this.syncDifferenceEstimator.synchronizing();
                 }
@@ -101,7 +92,7 @@ export class SynchronizedPlayer {
 
     private getExpectedCurrentTime() {
         return (
-            (Date.now() + this.config.synchronisationOffset) %
+            ((Date.now() + this.config.synchronisationOffset) / 4) %
             this.getDuration()
         );
     }

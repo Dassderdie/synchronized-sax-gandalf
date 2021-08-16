@@ -1,9 +1,10 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable } from '@angular/core';
 import Pusher, { PresenceChannel } from 'pusher-js';
-import { Observable, ReplaySubject } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { Follower } from './Follower';
 import { Leader } from './Leader';
+import { VideoSettings } from './video-settings';
 
 @Injectable({
     providedIn: 'root',
@@ -13,13 +14,14 @@ export class PusherService {
     private pusher: Pusher;
     public readonly type$ = new ReplaySubject<'Follower' | 'Leader'>(1);
     public readonly numberOfMembers$ = new ReplaySubject<number>(1);
-    public readonly videoId$ = new ReplaySubject<string>(1);
+    public readonly videoSettings$ = new ReplaySubject<VideoSettings>(1);
 
     constructor() {
         this.pusher = new Pusher(environment.pusher.key, {
             cluster: environment.pusher.cluster,
             authEndpoint: '.netlify/functions/pusher-auth',
         });
+        this.videoSettings$.subscribe((a) => console.log(a));
     }
 
     /**
@@ -28,7 +30,7 @@ export class PusherService {
      */
     public async initialize(
         channelId: string,
-        videoId: string,
+        videoSettings: VideoSettings,
         forceLeader?: boolean
     ) {
         if (this.pusherApi) {
@@ -41,11 +43,11 @@ export class PusherService {
             channel.bind('pusher:subscription_succeeded', () => {
                 // TODO: there are many edge cases where this could go wrong
                 if (channel.members.count === 1 || forceLeader) {
-                    this.pusherApi = new Leader(channel, videoId);
+                    this.pusherApi = new Leader(channel, videoSettings);
                 } else {
                     this.pusherApi = new Follower(channel);
                 }
-                this.pusherApi.videoId$.subscribe(this.videoId$);
+                this.pusherApi.videoSettings$.subscribe(this.videoSettings$);
                 this.type$.next(this.pusherApi.type);
                 this.numberOfMembers$.next(channel.members.count);
                 channel.bind('pusher:member_added', () =>
@@ -63,9 +65,9 @@ export class PusherService {
         return this.pusherApi?.getTimeOffset();
     }
 
-    public setVideoId(nextVideoId: string) {
+    public setVideoSettings(videoSettings: VideoSettings) {
         assert(this.pusherApi?.type === 'Leader');
-        this.pusherApi.setVideoId(nextVideoId);
+        this.pusherApi.setVideoSettings(videoSettings);
     }
 }
 

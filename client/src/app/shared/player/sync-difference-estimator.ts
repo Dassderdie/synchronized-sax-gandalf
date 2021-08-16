@@ -1,17 +1,8 @@
-import { Subject } from 'rxjs';
-
 export class SyncDifferenceEstimator {
     private lastDeviations: (number | null)[] = new Array(4).fill(null);
     public estimatedSyncTimeDifference?: number;
-    /**
-     * Emits every time the video is probably stuck
-     */
-    public readonly stuck$ = new Subject();
 
-    constructor(
-        private stuckDeviation: number,
-        private syncPrecision: number
-    ) {}
+    constructor(private syncPrecision: number) {}
 
     public addDeviation(deviation: number) {
         this.lastDeviations.shift();
@@ -32,18 +23,6 @@ export class SyncDifferenceEstimator {
             } else if (this.lastDeviations.length < 12) {
                 this.lastDeviations.unshift(null);
             }
-        }
-        // Wether the video seems stuck
-        if (
-            this.lastDeviations
-                .slice(-3)
-                .every(
-                    (lastDeviation) =>
-                        typeof lastDeviation === 'number' &&
-                        Math.abs(deviation) > this.stuckDeviation
-                )
-        ) {
-            this.stuck$.next();
         }
     }
 
