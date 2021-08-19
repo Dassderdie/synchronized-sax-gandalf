@@ -31,6 +31,14 @@
 </div>
 <br />
 <div *ngIf="(pusherService.type$ | async) === 'Leader'">
+    <img
+        style="max-height: 1.5rem"
+        [src]="
+            'http://img.youtube.com/vi/' +
+            newVideoSettings.videoId +
+            '/sddefault.jpg'
+        "
+    />
     <mat-form-field appearance="fill" style="width: 250px">
         <mat-label>Video-Id</mat-label>
         <input
@@ -43,6 +51,15 @@
                 *ngFor="let videoId of recommendedVideoIds"
                 [value]="videoId"
             >
+                <img
+                    style="max-height: 1.5rem"
+                    [src]="
+                        'http://img.youtube.com/vi/' +
+                        videoId +
+                        '/sddefault.jpg'
+                    "
+                />
+
                 {{ videoId }}
             </mat-option>
         </mat-autocomplete>
