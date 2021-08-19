@@ -8,9 +8,11 @@ import { LandingPageModule } from './components/landing-page/landing-page.module
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
 import { DemoModule } from './components/demo/demo.module';
+import { AboutComponent } from './components/about/about.component';
+import { MatToolbarModule } from '@angular/material/toolbar';
 
 @NgModule({
-    declarations: [AppComponent],
+    declarations: [AppComponent, AboutComponent],
     imports: [
         BrowserModule,
         AppRoutingModule,
@@ -23,6 +25,7 @@ import { DemoModule } from './components/demo/demo.module';
             registrationStrategy: 'registerWhenStable:30000',
         }),
         DemoModule,
+        MatToolbarModule,
     ],
     providers: [],
     bootstrap: [AppComponent],

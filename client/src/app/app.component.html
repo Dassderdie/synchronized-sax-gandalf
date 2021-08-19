@@ -1,1 +1,35 @@
-<router-outlet> </router-outlet>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="#">Synchronized Sax Gandalf</a>
+
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a
+                    class="ml-3 link-light"
+                    routerLink="/about"
+                    routerLinkActive="active"
+                    [routerLinkActiveOptions]="{ exact: true }"
+                >
+                    About/How it works
+                </a>
+            </li>
+        </ul>
+
+        <a
+            mat-icon-button
+            class="btn btn-link"
+            href="https://github.com/Dassderdie/synchronized-sax-gandalf"
+        >
+            <img style="max-height: 2rem" src="assets/GitHub_Logo_White.png" />
+        </a>
+    </div>
+</nav>
+
+<br />
+<br />
+<div class="container">
+    <br />
+    <br />
+
+    <router-outlet> </router-outlet>
+</div>
