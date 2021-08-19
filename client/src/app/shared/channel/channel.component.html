@@ -43,7 +43,10 @@
         <mat-label>Video-Id</mat-label>
         <input
             matInput
-            [(ngModel)]="newVideoSettings.videoId"
+            [ngModel]="newVideoSettings.videoId"
+            (ngModelChange)="
+                newVideoSettings.videoId = $event; setVideoSettings()
+            "
             [matAutocomplete]="auto"
         />
         <mat-autocomplete #auto="matAutocomplete">
@@ -72,18 +75,10 @@
         step="1"
         thumbLabel="true"
         tickInterval="auto"
-        [(ngModel)]="newVideoSettings.volume"
+        [ngModel]="newVideoSettings.volume"
+        (ngModelChange)="newVideoSettings.volume = $event; setVideoSettings()"
     >
     </mat-slider>
-    <br />
-    <button
-        mat-flat-button
-        (click)="setVideoSettings()"
-        color="primary"
-        style="margin-left: 3px"
-    >
-        Adapt Settings
-    </button>
 </div>
 <div *ngIf="(pusherService.type$ | async) === 'Follower'">
     System time offset: {{ systemTimeOffset }}ms
