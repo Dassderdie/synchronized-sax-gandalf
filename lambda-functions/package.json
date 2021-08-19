@@ -1,7 +1,0 @@
-{
-    "name": "synchronized-sax-gandalf",
-    "dependencies": {
-        "pusher": "^5.0.0",
-        "uuid": "^8.3.2"
-    }
-}

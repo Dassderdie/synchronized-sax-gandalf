@@ -1,14 +1,15 @@
 import { PresenceChannel } from 'pusher-js';
 import { PusherApi } from './pusher-api';
 import { SyncTimeMessage } from './sync-time-message';
+import { VideoSettings } from './video-settings';
 
 export class Follower extends PusherApi {
     public readonly type = 'Follower';
 
     constructor(readonly channel: PresenceChannel) {
         super();
-        channel.bind('client-video', (message: { videoId: string }) => {
-            this.videoId$.next(message.videoId);
+        channel.bind('client-video-settings', (message: VideoSettings) => {
+            this.videoSettings$.next(message);
         });
     }
 

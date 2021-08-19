@@ -22,10 +22,22 @@
     </button>
     <br />
 </div>
+<div *ngIf="status === 'started'">
+    <h1>
+        {{ pusherService.type$ | async }}
+        <span class="text-muted">on channel {{ channelId }}</span>
+    </h1>
+    Members on this channel: {{ pusherService.numberOfMembers$ | async }} <br />
+</div>
+<br />
 <div *ngIf="(pusherService.type$ | async) === 'Leader'">
     <mat-form-field appearance="fill" style="width: 250px">
         <mat-label>Video-Id</mat-label>
-        <input matInput [(ngModel)]="nextVideoId" [matAutocomplete]="auto" />
+        <input
+            matInput
+            [(ngModel)]="newVideoSettings.videoId"
+            [matAutocomplete]="auto"
+        />
         <mat-autocomplete #auto="matAutocomplete">
             <mat-option
                 *ngFor="let videoId of recommendedVideoIds"
@@ -35,37 +47,46 @@
             </mat-option>
         </mat-autocomplete>
     </mat-form-field>
+    <br />
+    Volume:
+    <mat-slider
+        max="100"
+        min="0"
+        step="1"
+        thumbLabel="true"
+        tickInterval="auto"
+        [(ngModel)]="newVideoSettings.volume"
+    >
+    </mat-slider>
+    <br />
     <button
         mat-flat-button
-        (click)="setVideoId()"
+        (click)="setVideoSettings()"
         color="primary"
         style="margin-left: 3px"
     >
-        Set videoId
+        Adapt Settings
+    </button>
+</div>
+<div *ngIf="(pusherService.type$ | async) === 'Follower'">
+    System time offset: {{ systemTimeOffset }}ms
+    <button
+        mat-flat-button
+        (click)="syncTime()"
+        color="secondary"
+        style="margin-left: 3px"
+    >
+        Synchronize
+        <mat-spinner *ngIf="syncingTime" color="secondary"></mat-spinner>
     </button>
 </div>
 <mat-spinner *ngIf="status === 'starting'"></mat-spinner>
 <div *ngIf="status === 'started'">
-    Channel-Id: {{ channelId }} - {{ pusherService.type$ | async }}
-    <br />
-    Members on this channel: {{ pusherService.numberOfMembers$ | async }} <br />
-    <ng-container *ngIf="(pusherService.type$ | async) === 'Follower'">
-        System time offset: {{ systemTimeOffset }}ms
-        <button
-            mat-flat-button
-            (click)="syncTime()"
-            color="secondary"
-            style="margin-left: 3px"
-        >
-            Synchronize
-            <mat-spinner *ngIf="syncingTime" color="secondary"></mat-spinner>
-        </button>
-    </ng-container>
     <br />
     <ng-container *ngIf="systemTimeOffset !== undefined">
         <app-production-player
-            *ngIf="pusherService.videoId$ | async as videoId"
-            [videoId]="videoId"
+            *ngIf="pusherService.videoSettings$ | async as videoSettings"
+            [videoSettings]="videoSettings"
             [systemTimeOffset]="systemTimeOffset"
         ></app-production-player>
     </ng-container>
