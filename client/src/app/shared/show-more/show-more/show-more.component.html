@@ -1,0 +1,20 @@
+<div
+    #wrapper
+    [style.max-height]="defaultHeight"
+    style="overflow-y: hidden; position: relative"
+>
+    <ng-content></ng-content>
+    <button
+        *ngIf="!fits"
+        class="btn btn-sm btn-light m-1"
+        style="
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            background: rgba(248, 249, 250, 0.85);
+        "
+        (click)="toggleShowMore()"
+    >
+        {{ showingMore ? 'Show less' : 'Show more' }}
+    </button>
+</div>

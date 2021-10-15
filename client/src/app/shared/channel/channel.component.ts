@@ -5,6 +5,7 @@ import {
 } from '@angular/core';
 import { cloneDeep } from 'lodash-es';
 import { PusherService } from 'src/app/core/pusher.service';
+import { ShareService } from 'src/app/core/share/share.service';
 import { VideoSettings } from 'src/app/core/video-settings';
 
 @Component({
@@ -16,6 +17,7 @@ import { VideoSettings } from 'src/app/core/video-settings';
 export class ChannelComponent {
     constructor(
         public readonly pusherService: PusherService,
+        public readonly shareService: ShareService,
         private readonly changeDetectorRef: ChangeDetectorRef
     ) {}
 

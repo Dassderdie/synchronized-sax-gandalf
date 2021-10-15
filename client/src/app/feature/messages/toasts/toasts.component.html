@@ -1,0 +1,67 @@
+<!-- Be my guest to tidy up this css ^^ -->
+<div
+    *ngIf="messageService.toastMessages$ | async as messages"
+    style="position: relative"
+>
+    <div style="position: absolute; right: 0">
+        <!-- Now in container most right -->
+        <div style="position: fixed; z-index: 10000">
+            <!-- always on the same spot in the viewport, over the rest of the page -->
+            <div style="position: relative">
+                <div style="position: absolute; right: 0; width: max-content">
+                    <!-- Show the 5 newest toasts -->
+                    <div
+                        *ngFor="
+                            let message of messages | slice: 0:5;
+                            trackBy: 'id' | trackByProperty
+                        "
+                        (mouseenter)="message.timer?.pause()"
+                        (mouseleave)="message.timer?.start()"
+                        class="toast show ms-auto"
+                        style="min-width: 200px"
+                        @fade
+                    >
+                        <app-custom-timer-progress-bar
+                            *ngIf="message.timer"
+                            [timer]="message.timer"
+                            [color]="message.config.color"
+                        ></app-custom-timer-progress-bar>
+                        <div class="toast-header">
+                            <strong
+                                [class]="'me-auto text-' + message.config.color"
+                            >
+                                {{ message.config.title }}
+                            </strong>
+                            <span
+                                *ngIf="message.amount > 1"
+                                class="ms-2 badge bg-secondary"
+                                >{{ message.amount }}</span
+                            >
+                            <button
+                                type="button"
+                                class="ms-2 mb-1 btn-close"
+                                (click)="
+                                    messageService.removeMessage(
+                                        message.id,
+                                        'toast'
+                                    )
+                                "
+                            ></button>
+                        </div>
+                        <div
+                            *ngIf="
+                                (message.config.body && message.config.body) ||
+                                message.config.log
+                            "
+                            class="toast-body"
+                        >
+                            <app-message-body
+                                [message]="message"
+                            ></app-message-body>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
