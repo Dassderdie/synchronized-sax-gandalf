@@ -44,5 +44,4 @@ The code is a bit more sophisticated (and complicated) but this is the general i
 
 ## Results
 
-
-
+I plan to make some measurements by filming or photographing the on two devices synchronized video. Under consideration of e.g. the refresh rate of the monitor I could try to empirically determine the quality of the synchronisation.
