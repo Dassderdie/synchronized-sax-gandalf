@@ -26,6 +26,15 @@
     <h1>
         {{ pusherService.type$ | async }}
         <span class="text-muted">on channel {{ channelId }}</span>
+
+        <button
+            class="ms-3"
+            mat-flat-button
+            color="secondary"
+            (click)="shareService.shareUrl()"
+        >
+            Share
+        </button>
     </h1>
     Members on this channel: {{ pusherService.numberOfMembers$ | async }} <br />
 </div>

@@ -32,6 +32,7 @@
         "pusher-js": "^7.0.3",
         "rxjs": "~6.6.0",
         "tslib": "^2.2.0",
+        "uuid": "^8.3.2",
         "zone.js": "~0.11.4"
     },
     "devDependencies": {
@@ -40,8 +41,9 @@
         "@angular/compiler-cli": "~12.1.1",
         "@types/jasmine": "~3.6.0",
         "@types/lodash-es": "^4.17.4",
-        "@types/node": "^12.11.1",
+        "@types/node": "^16.9.1",
         "@types/youtube": "^0.0.42",
+        "@types/uuid": "^8.3.1",
         "jasmine-core": "~3.8.0",
         "karma": "~6.3.0",
         "karma-chrome-launcher": "~3.1.0",
