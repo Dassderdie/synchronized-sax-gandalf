@@ -7,12 +7,10 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LandingPageModule } from './components/landing-page/landing-page.module';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
-import { DemoModule } from './components/demo/demo.module';
-import { AboutComponent } from './components/about/about.component';
 import { MatToolbarModule } from '@angular/material/toolbar';
 
 @NgModule({
-    declarations: [AppComponent, AboutComponent],
+    declarations: [AppComponent],
     imports: [
         BrowserModule,
         AppRoutingModule,
@@ -24,7 +22,6 @@ import { MatToolbarModule } from '@angular/material/toolbar';
             // or after 30 seconds (whichever comes first).
             registrationStrategy: 'registerWhenStable:30000',
         }),
-        DemoModule,
         MatToolbarModule,
     ],
     providers: [],
