@@ -1,5 +1,5 @@
 import { interval, ReplaySubject, Subject } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
+import { filter, map, takeUntil } from 'rxjs/operators';
 import { SynchronizedPlayerConfiguration } from './synchronized-player-configuration';
 import { SyncDifferenceEstimator } from './sync-difference-estimator';
 
@@ -11,6 +11,7 @@ export class SynchronizedPlayer {
 
     private isPaused = true;
     public readonly state$ = new ReplaySubject<SynchronizedPlayerState>(1);
+    public readonly expectedCurrentTimePercent$ = new ReplaySubject<number>(1);
     /**
      * The current deviation from the "base" timeline
      */
@@ -59,6 +60,14 @@ export class SynchronizedPlayer {
                 }
                 this.deviation$.next(Math.round(deviation));
             });
+        interval(1000)
+            .pipe(
+                map(
+                    () =>
+                        this.getExpectedCurrentTime() / this.getVideoDuration()
+                )
+            )
+            .subscribe(this.expectedCurrentTimePercent$);
     }
 
     private synchronisationTimeout?: ReturnType<typeof setTimeout>;
@@ -102,15 +111,31 @@ export class SynchronizedPlayer {
     }
 
     private getExpectedCurrentTime() {
+        const videoDuration = this.getVideoDuration();
         return (
             (Date.now() +
-                this.videoTimeOffset * this.getVideoDuration() +
+                this.videoTimeOffset * videoDuration +
                 this.config.synchronisationOffset) %
-            this.getVideoDuration()
+            videoDuration
+        );
+    }
+
+    // for testing
+    static getExpectedCurrentTime(
+        videoDuration: number,
+        now: number,
+        videoTimeOffset: number,
+        synchronisationOffset: number = new SynchronizedPlayerConfiguration()
+            .synchronisationOffset
+    ) {
+        return (
+            (now + videoTimeOffset * videoDuration + synchronisationOffset) %
+            videoDuration
         );
     }
 
     public destroy() {
+        this.expectedCurrentTimePercent$.complete();
         this.destroyed.next();
     }
 }

@@ -23,4 +23,5 @@
     [isPaused]="isPaused"
     [isFullscreen$]="isFullscreen$"
     [synchronizedPlayerConfig]="config"
+    (newVideoTimeOffset)="newVideoTimeOffset.emit($event)"
 ></app-youtube-player>

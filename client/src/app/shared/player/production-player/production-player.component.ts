@@ -1,4 +1,4 @@
-import { SimpleChanges } from '@angular/core';
+import { EventEmitter, Output, SimpleChanges } from '@angular/core';
 import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
 import { Subject } from 'rxjs';
 import { VideoSettings } from 'src/app/core/video-settings';
@@ -13,6 +13,7 @@ import { SynchronizedPlayerConfiguration } from '../synchronized-player-configur
 export class ProductionPlayerComponent {
     @Input() systemTimeOffset!: number;
     @Input() videoSettings!: VideoSettings;
+    @Output() newVideoTimeOffset = new EventEmitter<number>();
 
     public isPaused = true;
     public isFullscreen$ = new Subject();

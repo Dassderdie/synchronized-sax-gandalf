@@ -2,8 +2,10 @@ import {
     AfterViewInit,
     ChangeDetectorRef,
     ElementRef,
+    EventEmitter,
     OnChanges,
     OnInit,
+    Output,
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
@@ -29,6 +31,7 @@ export class YoutubePlayerComponent
     @Input() synchronizedPlayerConfig?: SynchronizedPlayerConfiguration;
     @Input() isPaused = true;
     @Input() isFullscreen$?: Observable<unknown>;
+    @Output() newVideoTimeOffset = new EventEmitter<number>();
 
     @ViewChild('container') private containerRef!: ElementRef<HTMLDivElement>;
     @ViewChild('playerPlaceholder')
@@ -113,6 +116,7 @@ export class YoutubePlayerComponent
         this.player.setVolume(this.videoSettings.volume);
         this.player.pauseVideo();
         this.initSynchronizedPlayer();
+        this.changeExpectedCurrentTimePercent(0);
         // because onPlayerReady is no event patched by zone.js
         this.changeDetectorRef.detectChanges();
     }
@@ -138,6 +142,36 @@ export class YoutubePlayerComponent
     private updateSize() {
         const containerWidth = this.containerRef.nativeElement.clientWidth;
         this.player?.setSize(containerWidth, containerWidth / (16 / 9));
+    }
+
+    public changeExpectedCurrentTimePercent(
+        newExpectedCurrentTimePercent: number
+    ) {
+        // calculate the correct videoTimeOffset2
+        const videoDuration = this.player!.getDuration() * 1000;
+        const newExpectedCurrentTime =
+            newExpectedCurrentTimePercent * videoDuration;
+        const expectedCurrentTime1 = SynchronizedPlayer.getExpectedCurrentTime(
+            videoDuration,
+            Date.now(),
+            this.videoSettings.videoTimeOffset
+        );
+        const videoTimeOffset1 = this.videoSettings.videoTimeOffset;
+        const changedTime = expectedCurrentTime1 - newExpectedCurrentTime;
+        const changedVideoTimeOffset = changedTime / videoDuration;
+        const videoTimeOffset2 =
+            (videoTimeOffset1 - changedVideoTimeOffset) % 1;
+
+        this.newVideoTimeOffset.emit(videoTimeOffset2);
+        // TODO: add unit-test
+        // expect(newExpectedCurrentTime).toBeCloseTo(
+        //     SynchronizedPlayer.getExpectedCurrentTime(
+        //         videoDuration,
+        //         now,
+        //         videoTimeOffset2
+        //     ),
+        //     10
+        // );
     }
 
     ngOnDestroy() {

@@ -3,8 +3,8 @@ export class VideoSettings {
     /**
      * between 0 and 1 indicating at what percentage the video should start
      */
-    public readonly videoTimeOffset = 0;
-    public readonly volume = 100;
+    public readonly videoTimeOffset: number = 0;
+    public readonly volume: number = 100;
 
     public static readonly recommendedVideoIds = [
         'BBGEG21CGo0',

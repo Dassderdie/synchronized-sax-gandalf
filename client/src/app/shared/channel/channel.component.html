@@ -61,6 +61,7 @@
             *ngIf="pusherService.videoSettings$ | async as videoSettings"
             [videoSettings]="videoSettings"
             [systemTimeOffset]="systemTimeOffset"
+            (newVideoTimeOffset)="setVideoTimeOffset(videoSettings, $event)"
         ></app-production-player>
     </ng-container>
 </div>

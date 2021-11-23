@@ -53,4 +53,11 @@ export class ChannelComponent {
     public setVideoSettings(newVideoSettings: VideoSettings) {
         this.pusherService.setVideoSettings(cloneDeep(newVideoSettings));
     }
+
+    public setVideoTimeOffset(
+        videoSettings: VideoSettings,
+        videoTimeOffset: number
+    ) {
+        this.setVideoSettings({ ...videoSettings, videoTimeOffset });
+    }
 }
