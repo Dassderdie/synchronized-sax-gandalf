@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ProductionPlayerModule } from '../player/production-player/production-player.module';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -11,12 +10,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSliderModule } from '@angular/material/slider';
 import { VideoSettingsFormComponent } from './video-settings-form/video-settings-form.component';
+import { YoutubePlayerModule } from '../player/youtube-player/youtube-player.module';
 
 @NgModule({
     declarations: [ChannelComponent, VideoSettingsFormComponent],
     imports: [
         CommonModule,
-        ProductionPlayerModule,
+        YoutubePlayerModule,
         MatInputModule,
         FormsModule,
         MatButtonModule,

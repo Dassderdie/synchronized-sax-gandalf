@@ -42,7 +42,7 @@
 </div>
 
 <div *ngIf="(pusherService.type$ | async) === 'Follower'">
-    System time offset: {{ systemTimeOffset }}ms
+    System time offset: {{ synchronizedPlayerConfig?.synchronisationOffset }}ms
     <button
         mat-flat-button
         (click)="syncTime()"
@@ -56,12 +56,15 @@
 <mat-spinner *ngIf="status === 'starting'"></mat-spinner>
 <div *ngIf="status === 'started'">
     <br />
-    <ng-container *ngIf="systemTimeOffset !== undefined">
-        <app-production-player
+    <ng-container *ngIf="synchronizedPlayerConfig">
+        <app-youtube-player
             *ngIf="pusherService.videoSettings$ | async as videoSettings"
+            [enableVideoSettingsEditing]="
+                (pusherService.type$ | async) === 'Leader'
+            "
             [videoSettings]="videoSettings"
-            [systemTimeOffset]="systemTimeOffset"
+            [synchronizedPlayerConfig]="synchronizedPlayerConfig"
             (newVideoTimeOffset)="setVideoTimeOffset(videoSettings, $event)"
-        ></app-production-player>
+        ></app-youtube-player>
     </ng-container>
 </div>

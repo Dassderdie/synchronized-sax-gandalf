@@ -6,6 +6,7 @@ import {
 import { cloneDeep } from 'lodash-es';
 import { PusherService } from 'src/app/core/pusher.service';
 import { VideoSettings } from 'src/app/core/video-settings';
+import { SynchronizedPlayerConfiguration } from '../player/synchronized-player-configuration';
 
 @Component({
     selector: 'app-channel',
@@ -35,7 +36,8 @@ export class ChannelComponent {
         this.syncTime();
     }
 
-    public systemTimeOffset?: number;
+    public synchronizedPlayerConfig?: SynchronizedPlayerConfiguration;
+
     public syncingTime?: Promise<number | undefined>;
     public async syncTime() {
         this.syncingTime = this.pusherService.getTimeOffset();
@@ -46,7 +48,10 @@ export class ChannelComponent {
             console.log('Mode not set!');
             return;
         }
-        this.systemTimeOffset = offset;
+        this.synchronizedPlayerConfig = {
+            ...new SynchronizedPlayerConfiguration(),
+            synchronisationOffset: offset,
+        };
         this.changeDetectorRef.markForCheck();
     }
 

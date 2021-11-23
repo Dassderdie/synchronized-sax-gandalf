@@ -1,3 +1,23 @@
+<div>
+    <button
+        mat-flat-button
+        (click)="toggleIsPaused()"
+        color="primary"
+        style="margin-left: 3px"
+    >
+        {{ isPaused ? 'Play' : 'Pause' }}
+    </button>
+    <button
+        *ngIf="!isPaused"
+        mat-flat-button
+        (click)="enableFullscreen()"
+        color="primary"
+        style="margin-left: 3px"
+    >
+        Fullscreen
+    </button>
+</div>
+
 <div #container class="w-100" style="position: relative">
     <div style="position: absolute; top: 0">
         <span style="background-color: rgba(0, 0, 0, 0.25)">
@@ -30,7 +50,11 @@
         <!-- Gets replaced by an iframe with the youtube player -->
         <div #playerPlaceholder class="w-100"></div>
     </div>
-    <div class="w-100" style="position: absolute; bottom: 0">
+    <div
+        *ngIf="enableVideoSettingsEditing"
+        class="w-100"
+        style="position: absolute; bottom: 0"
+    >
         <mat-slider
             *ngIf="
                 synchronizedPlayer?.expectedCurrentTimePercent$ as expectedCurrentTimePercent$
