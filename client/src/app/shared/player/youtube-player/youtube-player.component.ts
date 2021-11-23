@@ -3,6 +3,7 @@ import {
     ChangeDetectorRef,
     ElementRef,
     OnChanges,
+    OnInit,
     SimpleChanges,
     ViewChild,
 } from '@angular/core';
@@ -21,13 +22,15 @@ import { YoutubePlayerApiService } from './youtube-player-api.service';
     styleUrls: ['./youtube-player.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
+export class YoutubePlayerComponent
+    implements AfterViewInit, OnInit, OnChanges
+{
     @Input() videoSettings!: VideoSettings;
     @Input() synchronizedPlayerConfig?: SynchronizedPlayerConfiguration;
     @Input() isPaused = true;
-    @Input() fullscreen$?: Observable<unknown>;
+    @Input() isFullscreen$?: Observable<unknown>;
 
-    @ViewChild('container') containerRef!: ElementRef<HTMLDivElement>;
+    @ViewChild('container') private containerRef!: ElementRef<HTMLDivElement>;
     @ViewChild('playerPlaceholder')
     private playerPlaceholder!: ElementRef<HTMLDivElement>;
     private player?: YT.Player;
@@ -39,6 +42,14 @@ export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
         private readonly changeDetectorRef: ChangeDetectorRef,
         private readonly youtubePlayerApiService: YoutubePlayerApiService
     ) {}
+
+    ngOnInit() {
+        this.isFullscreen$?.pipe(takeUntil(this.destroyed)).subscribe(() => {
+            this.containerRef.nativeElement.requestFullscreen({
+                navigationUI: 'hide',
+            });
+        });
+    }
 
     async ngAfterViewInit() {
         const containerWidth = this.containerRef.nativeElement.clientWidth;
@@ -89,11 +100,6 @@ export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
         }
         if (changes.fullscreen$) {
             assert(changes.fullscreen$.isFirstChange());
-            this.fullscreen$?.pipe(takeUntil(this.destroyed)).subscribe(() => {
-                this.containerRef.nativeElement.requestFullscreen({
-                    navigationUI: 'hide',
-                });
-            });
         }
     }
 

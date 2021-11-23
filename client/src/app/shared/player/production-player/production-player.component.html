@@ -10,7 +10,7 @@
     <button
         *ngIf="!isPaused"
         mat-flat-button
-        (click)="fullscreen$.next()"
+        (click)="isFullscreen$.next()"
         color="primary"
         style="margin-left: 3px"
     >
@@ -21,6 +21,6 @@
 <app-youtube-player
     [videoSettings]="videoSettings"
     [isPaused]="isPaused"
-    [fullscreen$]="fullscreen$"
+    [isFullscreen$]="isFullscreen$"
     [synchronizedPlayerConfig]="config"
 ></app-youtube-player>

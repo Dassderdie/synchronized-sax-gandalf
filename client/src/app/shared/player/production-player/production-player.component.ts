@@ -15,7 +15,7 @@ export class ProductionPlayerComponent {
     @Input() videoSettings!: VideoSettings;
 
     public isPaused = true;
-    public fullscreen$ = new Subject();
+    public isFullscreen$ = new Subject();
     public config = new SynchronizedPlayerConfiguration();
 
     ngOnChanges(changes: SimpleChanges) {
