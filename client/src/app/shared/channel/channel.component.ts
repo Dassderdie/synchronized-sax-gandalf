@@ -43,6 +43,7 @@ export class ChannelComponent {
     public newVideoSettings: VideoSettings = {
         videoId: this.recommendedVideoIds[0],
         volume: 100,
+        videoTimeOffset: 0,
     };
     public systemTimeOffset?: number;
     public syncingTime?: Promise<number | undefined>;

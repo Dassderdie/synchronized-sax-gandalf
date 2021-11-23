@@ -20,11 +20,13 @@ export class SynchronizedPlayer {
 
     constructor(
         private config: SynchronizedPlayerConfiguration,
-        private readonly getDuration: () => number,
+        // this should in theorie be constant, but we are self-correcting...
+        private readonly getVideoDuration: () => number | typeof NaN,
         private readonly seekTo: (ms: number) => void,
         private readonly getCurrentTime: () => number,
         private readonly playVideo: () => void,
-        private readonly pauseVideo: () => void
+        private readonly pauseVideo: () => void,
+        private readonly videoTimeOffset: number
     ) {
         this.syncDifferenceEstimator = new SyncDifferenceEstimator(
             config.stuckDeviation,
@@ -68,7 +70,7 @@ export class SynchronizedPlayer {
         this.pauseVideo();
         this.seekTo(
             (this.getExpectedCurrentTime() + this.config.preloadTime) %
-                this.getDuration()
+                this.getVideoDuration()
         );
         this.pauseVideo();
         this.state$.next('synchronizing');
@@ -100,9 +102,13 @@ export class SynchronizedPlayer {
     }
 
     private getExpectedCurrentTime() {
+        console.log(this.videoTimeOffset, this.getVideoDuration());
+
         return (
-            (Date.now() + this.config.synchronisationOffset) %
-            this.getDuration()
+            (Date.now() +
+                this.videoTimeOffset * this.getVideoDuration() +
+                this.config.synchronisationOffset) %
+            this.getVideoDuration()
         );
     }
 

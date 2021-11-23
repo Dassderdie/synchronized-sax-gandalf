@@ -70,8 +70,3 @@ export class PusherService {
         this.pusherApi.setVideoSettings(videoSettings);
     }
 }
-
-interface Member {
-    id: string;
-    info: {};
-}

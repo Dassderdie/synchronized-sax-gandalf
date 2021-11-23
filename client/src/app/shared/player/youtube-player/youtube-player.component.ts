@@ -88,7 +88,12 @@ export class YoutubePlayerComponent
             }
             this.player.setVolume(this.videoSettings.volume);
         }
-        if (changes.synchronizedPlayerConfig && this.player) {
+        if (
+            (changes.synchronizedPlayerConfig ||
+                changes.videoSettings?.currentValue.videoTimeOffset !==
+                    changes.videoSettings?.previousValue.videoTimeOffset) &&
+            this.player
+        ) {
             this.initSynchronizedPlayer();
         }
         if (changes.isPaused && this.synchronizedPlayer) {
@@ -117,15 +122,13 @@ export class YoutubePlayerComponent
         this.synchronizedPlayer = new SynchronizedPlayer(
             this.synchronizedPlayerConfig ??
                 new SynchronizedPlayerConfiguration(),
-            () => {
-                const duration = this.player!.getDuration() * 1000;
-                assert(0 < duration);
-                return duration;
-            },
+            // the videoDuration is sometimes NaN -> therefore this is solved via a function
+            () => this.player!.getDuration() * 1000,
             (ms) => this.player!.seekTo(ms / 1000, true),
             () => this.player!.getCurrentTime() * 1000,
             () => this.player!.playVideo(),
-            () => this.player!.pauseVideo()
+            () => this.player!.pauseVideo(),
+            this.videoSettings.videoTimeOffset
         );
         if (!this.isPaused) {
             this.synchronizedPlayer.play();
