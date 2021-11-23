@@ -102,8 +102,6 @@ export class SynchronizedPlayer {
     }
 
     private getExpectedCurrentTime() {
-        console.log(this.videoTimeOffset, this.getVideoDuration());
-
         return (
             (Date.now() +
                 this.videoTimeOffset * this.getVideoDuration() +

@@ -30,7 +30,7 @@ export class PusherService {
      */
     public async initialize(
         channelId: string,
-        videoSettings: VideoSettings,
+        videoSettings = new VideoSettings(),
         forceLeader?: boolean
     ) {
         if (this.pusherApi) {

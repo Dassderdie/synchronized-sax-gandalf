@@ -32,70 +32,15 @@
 </div>
 
 <br />
-<div *ngIf="(pusherService.type$ | async) === 'Leader'">
-    <img
-        style="max-height: 1.5rem"
-        [src]="
-            'http://img.youtube.com/vi/' +
-            newVideoSettings.videoId +
-            '/sddefault.jpg'
-        "
-    />
-    <mat-form-field appearance="fill" style="width: 250px">
-        <mat-label>Video-Id</mat-label>
-        <input
-            matInput
-            [ngModel]="newVideoSettings.videoId"
-            (ngModelChange)="
-                newVideoSettings.videoId = $event; setVideoSettings()
-            "
-            [matAutocomplete]="auto"
-        />
-        <mat-autocomplete #auto="matAutocomplete">
-            <mat-option
-                *ngFor="let videoId of recommendedVideoIds"
-                [value]="videoId"
-            >
-                <img
-                    style="max-height: 1.5rem"
-                    [src]="
-                        'http://img.youtube.com/vi/' +
-                        videoId +
-                        '/sddefault.jpg'
-                    "
-                />
 
-                {{ videoId }}
-            </mat-option>
-        </mat-autocomplete>
-    </mat-form-field>
-    <br />
-    Volume:
-    <mat-slider
-        max="100"
-        min="0"
-        step="1"
-        thumbLabel="true"
-        tickInterval="auto"
-        [ngModel]="newVideoSettings.volume"
-        (ngModelChange)="newVideoSettings.volume = $event; setVideoSettings()"
-    >
-    </mat-slider>
-    <br />
-    videoTimeOffset:
-    <mat-slider
-        max="1"
-        min="0"
-        step="0.01"
-        thumbLabel="true"
-        tickInterval="auto"
-        [ngModel]="newVideoSettings.videoTimeOffset"
-        (ngModelChange)="
-            newVideoSettings.videoTimeOffset = $event; setVideoSettings()
-        "
-    >
-    </mat-slider>
+<div *ngIf="(pusherService.type$ | async) === 'Leader'">
+    <app-video-settings-form
+        *ngIf="pusherService.videoSettings$ | async as videoSettings"
+        [videoSettings]="videoSettings"
+        (videoSettingsChange)="setVideoSettings($event)"
+    ></app-video-settings-form>
 </div>
+
 <div *ngIf="(pusherService.type$ | async) === 'Follower'">
     System time offset: {{ systemTimeOffset }}ms
     <button

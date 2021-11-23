@@ -21,18 +21,13 @@ export class ChannelComponent {
 
     public forceLeader = false;
     public channelId = 'abcdef';
-    public readonly recommendedVideoIds = [
-        'BBGEG21CGo0',
-        's4lyelymLac',
-        'jRA1HBZhJ18',
-    ];
 
     public status: 'idle' | 'starting' | 'started' = 'idle';
     public async start() {
         this.status = 'starting';
         await this.pusherService.initialize(
             this.channelId,
-            this.newVideoSettings,
+            undefined,
             this.forceLeader
         );
         this.status = 'started';
@@ -40,11 +35,6 @@ export class ChannelComponent {
         this.syncTime();
     }
 
-    public newVideoSettings: VideoSettings = {
-        videoId: this.recommendedVideoIds[0],
-        volume: 100,
-        videoTimeOffset: 0,
-    };
     public systemTimeOffset?: number;
     public syncingTime?: Promise<number | undefined>;
     public async syncTime() {
@@ -60,7 +50,7 @@ export class ChannelComponent {
         this.changeDetectorRef.markForCheck();
     }
 
-    public setVideoSettings() {
-        this.pusherService.setVideoSettings(cloneDeep(this.newVideoSettings));
+    public setVideoSettings(newVideoSettings: VideoSettings) {
+        this.pusherService.setVideoSettings(cloneDeep(newVideoSettings));
     }
 }

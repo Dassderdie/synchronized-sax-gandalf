@@ -10,9 +10,10 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSliderModule } from '@angular/material/slider';
+import { VideoSettingsFormComponent } from './video-settings-form/video-settings-form.component';
 
 @NgModule({
-    declarations: [ChannelComponent],
+    declarations: [ChannelComponent, VideoSettingsFormComponent],
     imports: [
         CommonModule,
         ProductionPlayerModule,
