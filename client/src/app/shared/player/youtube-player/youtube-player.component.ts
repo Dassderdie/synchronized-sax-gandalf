@@ -22,7 +22,14 @@ import { YoutubePlayerApiService } from './youtube-player-api.service';
     styleUrls: ['./youtube-player.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
+/**
+ * A customized youtube video player that plays the video synchronized
+ */
 export class YoutubePlayerComponent implements AfterViewInit, OnChanges {
+    /**
+     * Wether the videoSettings should be able to change here
+     * (if false `newVideoTimeOffset` doesn't emit anything)
+     */
     @Input() enableVideoSettingsEditing!: boolean;
     @Input() videoSettings!: VideoSettings;
     @Input() synchronizedPlayerConfig?: SynchronizedPlayerConfiguration;

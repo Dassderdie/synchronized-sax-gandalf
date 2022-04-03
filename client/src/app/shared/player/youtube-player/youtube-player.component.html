@@ -1,11 +1,11 @@
-<div>
+<div class="mb-3">
     <button
         mat-flat-button
         (click)="toggleIsPaused()"
         color="primary"
         style="margin-left: 3px"
     >
-        {{ isPaused ? 'Play' : 'Pause' }}
+        {{ isPaused ? 'Play Client' : 'Pause Client' }}
     </button>
     <button
         *ngIf="!isPaused"
@@ -14,7 +14,7 @@
         color="primary"
         style="margin-left: 3px"
     >
-        Fullscreen
+        Go fullscreen
     </button>
 </div>
 

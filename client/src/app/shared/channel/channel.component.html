@@ -11,6 +11,7 @@
     >
         Force Leader (Advanced)
     </mat-slide-toggle>
+
     <br />
     <button
         mat-flat-button
@@ -28,7 +29,9 @@
         {{ pusherService.type$ | async }}
         <span class="text-muted">on channel {{ channelId }}</span>
     </h1>
-    Members on this channel: {{ pusherService.numberOfMembers$ | async }} <br />
+    <div class="small">
+        Members on this channel: {{ pusherService.numberOfMembers$ | async }}
+    </div>
 </div>
 
 <br />
@@ -42,7 +45,8 @@
 </div>
 
 <div *ngIf="(pusherService.type$ | async) === 'Follower'">
-    System time offset: {{ synchronizedPlayerConfig?.synchronisationOffset }}ms
+    System time offset:
+    {{ synchronizedPlayerConfig?.synchronisationOffset | number: '1.0-1' }}ms
     <button
         mat-flat-button
         (click)="syncTime()"

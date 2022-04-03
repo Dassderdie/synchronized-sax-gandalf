@@ -27,7 +27,11 @@ export class SyncDifferenceEstimator {
                 // ignore the first 3 elements because they have (likely) are likely inaccurate because of the synchronisation
                 (this.lastDeviations as number[]).slice(3)
             );
-            if (Math.abs(estimatedSyncTimeDifference) > this.syncPrecision) {
+            if (
+                Math.abs(estimatedSyncTimeDifference) >
+                // half could be too high and half to low
+                this.syncPrecision / 2
+            ) {
                 this.estimatedSyncTimeDifference = estimatedSyncTimeDifference;
             } else if (this.lastDeviations.length < 12) {
                 this.lastDeviations.unshift(null);
